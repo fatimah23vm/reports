@@ -3,12 +3,39 @@
 
 const express = require('express');
 const app = express();
-
 app.use(express.json());
 
+app.use('/uploads', express.static('uploads'));
 
+// Users Management
 const addUsersRoutes = require('./routes/addUsers');
 app.use('/users', addUsersRoutes);  
+
+// Owner Reports
+const ownerReportsRoutes = require('./routes/AddownerReports');
+app.use('/owner-reports', ownerReportsRoutes);
+
+// Work Items 
+const workItemsRoutes = require('./routes/AddworkItems');
+app.use('/work-items', workItemsRoutes);
+
+//Next Day Plans 
+const nextDayPlansRoutes = require('./routes/AddNextDayPlans');
+app.use('/next-day-plans', nextDayPlansRoutes);
+
+// Materials Management
+const materialsRoutes = require('./routes/AddMaterials');
+app.use('/materials', materialsRoutes);
+
+// Site Image Uplouds
+const siteImagesRoutes = require('./routes/AddSiteImages');
+app.use('/site-images', siteImagesRoutes);
+
+// Signatures Management
+const signaturesRoutes = require('./routes/AddSignatures');
+app.use('/signatures', signaturesRoutes);
+
+
 
 
 //  تهيئة المستخدمين (Admin + Sub Admin)

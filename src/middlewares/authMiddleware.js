@@ -48,7 +48,7 @@ const adminOnly = (req, res, next) => {
 
 // 🔹 Sub Admin (Engineer) فقط
 const subAdminOnly = (req, res, next) => {
-  if (req.user.role !== 'engineer') {
+  if (req.user.role !== 'sub_admin') {
     return res.status(403).json({ message: 'Engineer access only' });
   }
   next();

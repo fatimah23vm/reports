@@ -3,7 +3,7 @@
 const client = require('../config/db');
 const bcrypt = require('bcrypt');
 
-// 1️⃣ إنشاء جدول المستخدمين
+//إنشاء جدول المستخدمين
 const createUsersTable = async () => {
   try {
     await client.query(`
@@ -23,7 +23,7 @@ const createUsersTable = async () => {
 //  إنشاء المستخدمين الثابتين (مرة وحدة فقط)
 const createDefaultUsers = async () => {
   try {
-    // ===== Admin =====
+    //  Admin
     const adminExists = await client.query(
       'SELECT id FROM users WHERE username = $1',
       ['Admin@sa.com']
@@ -41,7 +41,7 @@ const createDefaultUsers = async () => {
       console.log('✅ Admin user created');
     }
 
-    // ===== Sub Admin (Engineer) =====
+    // Sub Admin (Engineer) 
     const subAdminExists = await client.query(
       'SELECT id FROM users WHERE username = $1',
       ['SubAdmin@sa.com']
@@ -64,7 +64,6 @@ const createDefaultUsers = async () => {
   }
 };
 
-// 3️⃣ تشغيل التهيئة
 const initUsers = async () => {
   await createUsersTable();
   await createDefaultUsers();

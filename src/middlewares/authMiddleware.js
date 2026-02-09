@@ -17,10 +17,10 @@ const requireAuth = async (req, res, next) => {
   const token = authHeader.split(' ')[1];
 
   try {
-    // 1️⃣ التحقق من صحة التوكن
-    const decoded = jwt.verify(token, 'SECRET_KEY'); // لاحقًا نحط SECRET_KEY في .env
+    // التحقق من صحة التوكن
+    const decoded = jwt.verify(token, 'SECRET_KEY'); 
 
-    // 2️⃣ جلب بيانات المستخدم من الداتابيس
+    //  جلب بيانات المستخدم من الداتابيس
     const result = await client.query(
       'SELECT * FROM users WHERE id = $1',
       [decoded.id]
@@ -38,7 +38,7 @@ const requireAuth = async (req, res, next) => {
   }
 };
 
-// 🔹 Admin فقط
+//  Admin فقط
 const adminOnly = (req, res, next) => {
   if (req.user.role !== 'admin') {
     return res.status(403).json({ message: 'Admin access only' });
@@ -46,7 +46,7 @@ const adminOnly = (req, res, next) => {
   next();
 };
 
-// 🔹 Sub Admin (Engineer) فقط
+// Sub Admin (Engineer) فقط
 const subAdminOnly = (req, res, next) => {
   if (req.user.role !== 'sub_admin') {
     return res.status(403).json({ message: 'Engineer access only' });

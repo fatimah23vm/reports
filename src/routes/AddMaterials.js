@@ -7,9 +7,9 @@ const client = require('../config/db');
 const { requireAuth, subAdminOnly } = require('../middlewares/authMiddleware');
 
 
-// ===============================
-// ➕ إضافة مادة (Engineer فقط)
-// ===============================
+
+//  إضافة مادة (Engineer فقط)
+
 router.post('/', requireAuth, subAdminOnly, async (req, res) => {
   const {
     report_id,
@@ -57,9 +57,8 @@ router.post('/', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 
-// ===============================
-// 📥 جلب المواد حسب report_id
-// ===============================
+//  جلب المواد حسب report_id
+
 router.get('/:reportId', requireAuth, async (req, res) => {
   const { reportId } = req.params;
 
@@ -76,9 +75,9 @@ router.get('/:reportId', requireAuth, async (req, res) => {
 });
 
 
-// ===============================
-// ✏️ تعديل مادة (Engineer فقط)
-// ===============================
+
+//  تعديل مادة (Engineer فقط)
+
 router.put('/:id', requireAuth, subAdminOnly, async (req, res) => {
   const { id } = req.params;
 
@@ -134,9 +133,9 @@ router.put('/:id', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 
-// ===============================
-// 🗑️ حذف مادة (Engineer فقط)
-// ===============================
+
+// حذف مادة (Engineer فقط)
+
 router.delete('/:id', requireAuth, subAdminOnly, async (req, res) => {
   const { id } = req.params;
 
@@ -158,3 +157,4 @@ router.delete('/:id', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 module.exports = router;
+///Users/fatimahadeeb/Desktop/Dit Projects/src/routes/AddMaterials.js

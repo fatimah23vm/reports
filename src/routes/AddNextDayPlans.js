@@ -6,7 +6,7 @@ const client = require('../config/db');
 const { requireAuth, subAdminOnly } = require('../middlewares/authMiddleware');
 
 
-// ✅ إضافة خطة لليوم التالي (Engineer فقط)
+// إضافة خطة لليوم التالي (Engineer فقط)
 router.post('/', requireAuth, subAdminOnly, async (req, res) => {
   const { report_id, description } = req.body;
 
@@ -32,7 +32,7 @@ router.post('/', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 
-// ✅ جلب خطط اليوم التالي حسب التقرير
+//  جلب خطط اليوم التالي حسب التقرير
 router.get('/:reportId', requireAuth, async (req, res) => {
   const { reportId } = req.params;
 
@@ -51,7 +51,7 @@ router.get('/:reportId', requireAuth, async (req, res) => {
 });
 
 
-// ✅ تعديل خطة (Engineer فقط)
+//  تعديل خطة (Engineer فقط)
 router.put('/:id', requireAuth, subAdminOnly, async (req, res) => {
   const { id } = req.params;
   const { description } = req.body;
@@ -83,7 +83,7 @@ router.put('/:id', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 
-// ✅ حذف خطة (Engineer فقط)
+//  حذف خطة (Engineer فقط)
 router.delete('/:id', requireAuth, subAdminOnly, async (req, res) => {
   const { id } = req.params;
 

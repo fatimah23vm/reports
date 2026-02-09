@@ -35,7 +35,13 @@ app.use('/site-images', siteImagesRoutes);
 const signaturesRoutes = require('./routes/AddSignatures');
 app.use('/signatures', signaturesRoutes);
 
+// inspection Request
+const inspectionRequestsRouter = require('./routes/AddinspectionRequests');
+app.use('/inspection-requests', inspectionRequestsRouter);
 
+// supervisors Notes 
+const supervisorsNotesRoutes = require('./routes/AddSupervisorsNotes');
+app.use('/supervisors-notes', supervisorsNotesRoutes);
 
 
 //  تهيئة المستخدمين (Admin + Sub Admin)

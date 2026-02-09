@@ -3,7 +3,7 @@
 
 const client = require('../config/db');
 
-// 1️⃣ إنشاء جدول owner_reports
+// إنشاء جدول owner_reports
 const createOwnerReportsTable = async () => {
   try {
     await client.query(`
@@ -28,7 +28,7 @@ const createOwnerReportsTable = async () => {
   }
 };
 
-// 2️⃣ توليد رقم تقرير بصيغة 0001-R, 0002-R ...
+//  توليد رقم تقرير بصيغة 0001-R, 0002-R ...
 const generateReportNumber = async () => {
   try {
     const result = await client.query('SELECT COUNT(*) FROM owner_reports');

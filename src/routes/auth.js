@@ -26,7 +26,7 @@ router.post('/login', async (req, res) => {
     return res.status(401).json({ message: 'Invalid username or password' });
   }
 
-  // 🔑 توليد JWT
+  // توليد JWT
   const token = jwt.sign(
     { id: user.id, role: user.role },
     'SECRET_KEY', // لاحقًا نحطها في ملف .env

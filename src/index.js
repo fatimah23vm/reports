@@ -3,6 +3,11 @@
 
 const express = require('express');
 const app = express();
+const cors = require('cors');   
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000'],
+  credentials: true
+}));              
 app.use(express.json());
 
 app.use('/uploads', express.static('uploads'));
@@ -43,6 +48,9 @@ app.use('/inspection-requests', inspectionRequestsRouter);
 const supervisorsNotesRoutes = require('./routes/AddSupervisorsNotes');
 app.use('/supervisors-notes', supervisorsNotesRoutes);
 
+// Daily Reports
+const dailyReportsRoutes = require('./routes/AdddailyReports'); 
+app.use('/daily-reports', dailyReportsRoutes);
 
 //  تهيئة المستخدمين (Admin + Sub Admin)
 const { initUsers } = require('./models/user');
@@ -58,9 +66,10 @@ app.get('/', (req, res) => {
 
 const PORT = 3000;
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Backend Server running on port ${PORT}`);
+  console.log(`📍 http://localhost:${PORT}`);
 
-  // إنشاء جدول المستخدمين + إضافة المستخدمين الثابتين
   await initUsers();
 });
-///Users/fatimahadeeb/Desktop/Dit Projects/src/index.js
+
+///Users/fatimahadeeb/Desktop/reports/src/index.js

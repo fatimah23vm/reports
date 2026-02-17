@@ -1,15 +1,14 @@
 
 
+// routes/WorkItems.js
 const express = require('express');
 const router = express.Router();
 const client = require('../config/db');
 const { requireAuth, subAdminOnly } = require('../middlewares/authMiddleware');
 
-
-// إضافة Work Item (المهندس فقط)
-
-router.post('/:reportId', requireAuth, subAdminOnly, async (req, res) => {
-  const { reportId } = req.params;
+// إضافة Work Item
+router.post('/:dailyReportId', requireAuth, subAdminOnly, async (req, res) => {
+  const { dailyReportId } = req.params;
   const { item_name, work_area, workers_count, quantity } = req.body;
 
   if (!item_name || !work_area) {
@@ -17,31 +16,13 @@ router.post('/:reportId', requireAuth, subAdminOnly, async (req, res) => {
   }
 
   try {
-    // التأكد أن التقرير موجود ولم يكتمل
-    const report = await client.query(
-      'SELECT status FROM owner_reports WHERE id = $1',
-      [reportId]
-    );
-
-    if (report.rows.length === 0) {
-      return res.status(404).json({ message: 'Report not found' });
-    }
-
-    if (report.rows[0].status === 'completed') {
-      return res.status(403).json({
-        message: 'Cannot edit work items for a completed report'
-      });
-    }
-
     const result = await client.query(
-      `
-      INSERT INTO work_items
-      (report_id, item_name, work_area, workers_count, quantity)
-      VALUES ($1,$2,$3,$4,$5)
-      RETURNING *
-      `,
+      `INSERT INTO work_items
+       (daily_report_id, item_name, work_area, workers_count, quantity)
+       VALUES ($1,$2,$3,$4,$5)
+       RETURNING *`,
       [
-        reportId,
+        dailyReportId,
         item_name,
         work_area,
         workers_count || 0,
@@ -49,84 +30,71 @@ router.post('/:reportId', requireAuth, subAdminOnly, async (req, res) => {
       ]
     );
 
-    res.json({
-      message: 'Work item added successfully',
-      work_item: result.rows[0]
-    });
+    res.status(201).json(result.rows[0]);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
- //جلب Work Items حسب التقرير
-
-router.get('/:reportId', requireAuth, async (req, res) => {
-  const { reportId } = req.params;
+// جلب Work Items
+router.get('/:dailyReportId', requireAuth, async (req, res) => {
+  const { dailyReportId } = req.params;
 
   try {
     const result = await client.query(
-      'SELECT * FROM work_items WHERE report_id = $1 ORDER BY id ASC',
-      [reportId]
+      'SELECT * FROM work_items WHERE daily_report_id=$1 ORDER BY id ASC',
+      [dailyReportId]
     );
 
-    res.json({ work_items: result.rows });
+    res.json(result.rows);
+
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-
- //تعديل Work Item (المهندس فقط)
-
-router.put('/item/:id', requireAuth, subAdminOnly, async (req, res) => {
-  const { id } = req.params;
+// تعديل Work Item
+router.put('/:dailyReportId/:id', requireAuth, subAdminOnly, async (req, res) => {
+  const { dailyReportId, id } = req.params;
   const { item_name, work_area, workers_count, quantity } = req.body;
 
   try {
     const result = await client.query(
-      `
-      UPDATE work_items
-      SET item_name = $1,
-          work_area = $2,
-          workers_count = $3,
-          quantity = $4
-      WHERE id = $5
-      RETURNING *
-      `,
-      [item_name, work_area, workers_count, quantity, id]
+      `UPDATE work_items
+       SET item_name=$1,
+           work_area=$2,
+           workers_count=$3,
+           quantity=$4
+       WHERE id=$5 AND daily_report_id=$6
+       RETURNING *`,
+      [item_name, work_area, workers_count, quantity, id, dailyReportId]
     );
 
-    if (result.rows.length === 0) {
+    if (!result.rows.length)
       return res.status(404).json({ message: 'Work item not found' });
-    }
 
-    res.json({
-      message: 'Work item updated successfully',
-      work_item: result.rows[0]
-    });
+    res.json(result.rows[0]);
 
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
 });
 
-//حذف Work Item (المهندس فقط)
-
-router.delete('/item/:id', requireAuth, subAdminOnly, async (req, res) => {
-  const { id } = req.params;
+// حذف Work Item
+router.delete('/:dailyReportId/:id', requireAuth, subAdminOnly, async (req, res) => {
+  const { dailyReportId, id } = req.params;
 
   try {
     const result = await client.query(
-      'DELETE FROM work_items WHERE id = $1 RETURNING *',
-      [id]
+      'DELETE FROM work_items WHERE id=$1 AND daily_report_id=$2 RETURNING *',
+      [id, dailyReportId]
     );
 
-    if (result.rows.length === 0) {
+    if (!result.rows.length)
       return res.status(404).json({ message: 'Work item not found' });
-    }
 
-    res.json({ message: 'Work item deleted successfully' });
+    res.json({ message: 'Deleted successfully' });
 
   } catch (err) {
     res.status(500).json({ message: err.message });

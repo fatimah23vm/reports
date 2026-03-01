@@ -1,5 +1,7 @@
 
 
+
+
 // src/pages/AdminDashboard.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 
@@ -989,15 +991,16 @@ useEffect(() => {
                 border: '1px solid rgba(0,0,0,0.02)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
                 transition: 'transform 0.2s ease',
+                textAlign: 'right',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500', letterSpacing: '0.3px' }}>إجمالي المشاريع</span>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500',textAlign: 'right', letterSpacing: '0.3px' }}>إجمالي المشاريع</span>
                 </div>
-                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0, lineHeight: 1 }}>{stats.totalProjects}</h3>
+                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0,textAlign: 'right', lineHeight: 1 }}>{stats.totalProjects}</h3>
               </div>
 
               <div style={{ 
@@ -1007,15 +1010,16 @@ useEffect(() => {
                 border: '1px solid rgba(0,0,0,0.02)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
                 transition: 'transform 0.2s ease',
+                textAlign: 'right',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500', letterSpacing: '0.3px' }}>إجمالي المهندسين</span>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500',textAlign: 'right', letterSpacing: '0.3px' }}>إجمالي المهندسين</span>
                 </div>
-                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0, lineHeight: 1 }}>{stats.totalEngineers}</h3>
+                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0,textAlign: 'right', lineHeight: 1 }}>{stats.totalEngineers}</h3>
               </div>
 
               <div style={{ 
@@ -1025,15 +1029,16 @@ useEffect(() => {
                 border: '1px solid rgba(0,0,0,0.02)',
                 boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
                 transition: 'transform 0.2s ease',
+                textAlign: 'right',
                 cursor: 'pointer'
               }}
               onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-4px)'}
               onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
               >
                 <div style={{ marginBottom: '16px' }}>
-                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500', letterSpacing: '0.3px' }}>إجمالي العمال</span>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '500',textAlign: 'right', letterSpacing: '0.3px' }}>إجمالي العمال</span>
                 </div>
-                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0, lineHeight: 1 }}>{stats.totalWorkers}</h3>
+                <h3 style={{ fontSize: '36px', fontWeight: '600', color: '#1a2634', margin: 0,textAlign: 'right', lineHeight: 1 }}>{stats.totalWorkers}</h3>
               </div>
             </div>
 
@@ -1623,6 +1628,7 @@ useEffect(() => {
     transition: 'all 0.2s ease',
     backgroundColor: 'white',
     cursor: 'pointer',
+    textAlign: 'right',
     boxSizing: 'border-box' 
   }}
   onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
@@ -1647,7 +1653,7 @@ useEffect(() => {
                     type="text" 
                     value={newProject.owner_name} 
                     onChange={(e) => setNewProject({ ...newProject, owner_name: e.target.value })} 
-                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s ease' }}
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px',textAlign: 'right', transition: 'all 0.2s ease' }}
                     onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     required 
@@ -1659,7 +1665,7 @@ useEffect(() => {
                     type="text" 
                     value={newProject.company_name} 
                     onChange={(e) => setNewProject({ ...newProject, company_name: e.target.value })} 
-                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s ease' }}
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', textAlign: 'right', transition: 'all 0.2s ease' }}
                     onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     required 
@@ -1671,32 +1677,55 @@ useEffect(() => {
                     type="text" 
                     value={newProject.location} 
                     onChange={(e) => setNewProject({ ...newProject, location: e.target.value })} 
-                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s ease' }}
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px',textAlign: 'right', transition: 'all 0.2s ease' }}
                     onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     required 
                   />
                 </div>
+              <div>
+  <label
+    style={{
+      fontSize: '13px',
+      fontWeight: '500',
+      color: '#475569',
+      marginBottom: '6px',
+      textAlign: 'right',
+      display: 'block'
+    }}
+  >
+    تاريخ المشروع
+  </label>
+<input
+  type="date"
+  value={newProject.report_date}
+  onChange={(e) =>
+    setNewProject({
+      ...newProject,
+      report_date: e.target.value
+    })
+  }
+  style={{
+    width: '100%',
+    padding: '10px 14px',
+    border: '1px solid #e2e8f0',
+    borderRadius: '10px',
+    fontSize: '14px',
+    textAlign: 'right',
+    direction: 'rtl',
+    transition: 'all 0.2s ease'
+  }}
+  required
+/>
+</div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px',textAlign: 'right', display: 'block' }}>تاريخ المشروع</label>
-                  <input 
-                    type="date" 
-                    value={newProject.report_date} 
-                    onChange={(e) => setNewProject({ ...newProject, report_date: e.target.value })} 
-                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s ease' }}
-                    onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
-                    onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
-                    required 
-                  />
-                </div>
-                <div>
-                  <label style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px', textAlign: 'right', display: 'block' }}>عدد العمال</label>
+                  <label style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px', textAlign: 'right',   flexDirection: 'row-reverse', display: 'block' }}>عدد العمال</label>
                   <input 
                     type="number" 
                     min="1" 
                     value={newProject.workers_count} 
                     onChange={(e) => setNewProject({ ...newProject, workers_count: e.target.value })} 
-                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px', transition: 'all 0.2s ease' }}
+                    style={{ width: '100%', padding: '10px 14px', border: '1px solid #e2e8f0', borderRadius: '10px', fontSize: '14px',textAlign: 'right', direction: 'rtl', transition: 'all 0.2s ease' }}
                     onFocus={(e) => e.target.style.borderColor = '#2d3e50'}
                     onBlur={(e) => e.target.style.borderColor = '#e2e8f0'}
                     required 
@@ -2912,6 +2941,24 @@ useEffect(() => {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+          .full-width {
+  width: 100%;
+}
+
+.react-datepicker {
+  font-family: 'Inter', sans-serif;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+}
+
+.react-datepicker__header {
+  background-color: #f8fafc;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.react-datepicker__day--selected {
+  background-color: #2d3e50 !important;
+}
       `}</style>
       
     </div>

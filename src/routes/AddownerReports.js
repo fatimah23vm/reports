@@ -133,7 +133,7 @@ router.get('/:id', requireAuth, async (req, res) => {
   }
 });
 
-// ✅✅✅ تعديل مشروع - للـ Admin والمهندس المسؤول فقط
+//  تعديل مشروع - للـ Admin والمهندس المسؤول فقط
 router.put('/:id', requireAuth, async (req, res) => {
   const reportId = req.params.id;
   const { engineer_name, owner_name, company_name, location, report_date, workers_count, status } = req.body;
@@ -188,6 +188,7 @@ router.put('/:id', requireAuth, async (req, res) => {
 });
 
 // ✅✅✅ حذف مشروع - للـ Admin والمهندس المسؤول فقط
+// ✅✅✅ حذف مشروع - للـ Admin والمهندس المسؤول فقط
 router.delete('/:id', requireAuth, async (req, res) => {
   const reportId = req.params.id;
 
@@ -202,12 +203,15 @@ router.delete('/:id', requireAuth, async (req, res) => {
       return res.status(404).json({ message: 'المشروع غير موجود' });
     }
 
-    // ✅ التحقق من الصلاحية: Admin أو المهندس المسؤول
-    if (req.user.role !== 'admin' && check.rows[0].engineer_name !== req.user.username) {
-      return res.status(403).json({ message: 'ليس لديك صلاحية لحذف هذا المشروع' });
+    // ✅✅✅ الشرط المعدل: Admin يقدر يحذف دائمًا
+    if (req.user.role !== 'admin') {
+      // إذا كان المستخدم ليس Admin، نتحقق إذا كان المهندس المسؤول
+      if (check.rows[0].engineer_name !== req.user.username) {
+        return res.status(403).json({ message: 'ليس لديك صلاحية لحذف هذا المشروع' });
+      }
     }
 
-    // ✅ لا نسمح بحذف المشاريع المكتملة
+    // ✅ لا نسمح بحذف المشاريع المكتملة (حتى للـ Admin)
     if (check.rows[0].status === 'completed') {
       return res.status(403).json({
         message: 'لا يمكن حذف مشروع مكتمل'

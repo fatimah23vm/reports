@@ -28,6 +28,41 @@ const [viewOnly, setViewOnly] = useState(false);
     const hoursDiff = (new Date() - new Date(createdAt)) / (1000 * 60 * 60);
     return hoursDiff < 24;
   };
+// ========== State للقوائم المنسدلة في التقارير ==========
+const [activeReportDropdown, setActiveReportDropdown] = useState(null);
+const [reportPopupPosition, setReportPopupPosition] = useState({ top: 0, left: 0 });
+
+// ========== دالة toggle للقائمة المنسدلة للتقارير ==========
+const toggleReportDropdown = (reportId, event) => {
+  event.stopPropagation();
+  
+  if (activeReportDropdown === reportId) {
+    setActiveReportDropdown(null);
+  } else {
+    const rect = event.currentTarget.getBoundingClientRect();
+    setReportPopupPosition({
+      top: rect.bottom + window.scrollY + 5,
+      left: rect.left + window.scrollX - 70,
+    });
+    setActiveReportDropdown(reportId);
+  }
+};
+
+// ========== إغلاق القائمة المنسدلة للتقارير عند الضغط خارجها ==========
+useEffect(() => {
+  const handleClickOutside = (event) => {
+    if (activeReportDropdown) {
+      setActiveReportDropdown(null);
+    }
+  };
+
+  document.addEventListener('click', handleClickOutside);
+  
+  return () => {
+    document.removeEventListener('click', handleClickOutside);
+  };
+}, [activeReportDropdown]);
+
 
 // ========== جلب مشاريع المهندس الحالي ==========
 const fetchMyProjects = useCallback(async () => {
@@ -866,7 +901,6 @@ if (!token || role !== 'sub_admin') {
           </div>
         )}
 
-    {/* 3️⃣ تقاريري المرسلة */}
 {/* 3️⃣ تقاريري المرسلة */}
 {activePage === 'myReports' && (
   <div style={{
@@ -1022,61 +1056,47 @@ if (!token || role !== 'sub_admin') {
                     boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
                   }}
                 >
-                  <td style={{ padding: '16px', textAlign: 'center' }}>
-                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                      <button
-                        onClick={() => {
-                          setSelectedReport(report);
-                          fetchReportDetails(report.id);
-                        }}
-                        style={{
-                          padding: '6px 16px',
-                          background: '#2d3e50',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '30px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          boxShadow: '0 2px 4px rgba(45, 62, 80, 0.2)'
-                        }}
-                        onMouseEnter={(e) => e.target.style.background = '#1a2634'}
-                        onMouseLeave={(e) => e.target.style.background = '#2d3e50'}
-                      >
-                        عرض
-                      </button>
-
-                      {canEdit && (
-                        <button
-                          onClick={() => navigate(`/project-report/${report.project_id}`, {
-                            state: {
-                              reportId: report.id,
-                              isEdit: true,
-                              reportData: report,
-                              projectData: report.project
-                            }
-                          })}
-                          style={{
-                            padding: '6px 16px',
-                            background: '#f59e0b',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '30px',
-                            fontSize: '12px',
-                            fontWeight: '500',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease',
-                            boxShadow: '0 2px 4px rgba(245, 158, 11, 0.2)'
-                          }}
-                          onMouseEnter={(e) => e.target.style.background = '#d97706'}
-                          onMouseLeave={(e) => e.target.style.background = '#f59e0b'}
-                        >
-                          تعديل
-                        </button>
-                      )}
-                    </div>
-                  </td>
+                <td style={{ padding: '16px', textAlign: 'center' }}>
+  <div>
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        toggleReportDropdown(report.id, e);
+      }}
+      style={{
+        padding: '6px 16px',
+        background: 'transparent',
+        color: '#2d3e50',
+        border: '1px solid #e2e8f0',
+        borderRadius: '6px',
+        fontSize: '13px',
+        fontWeight: '500',
+        cursor: 'pointer',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        transition: 'all 0.2s ease'
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.background = '#f8fafc';
+        e.target.style.borderColor = '#2d3e50';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.background = 'transparent';
+        e.target.style.borderColor = '#e2e8f0';
+      }}
+    >
+      الإجراءات
+      <span style={{ 
+        fontSize: '11px',
+        transition: 'transform 0.2s ease',
+        display: 'inline-block'
+      }}>
+        ▼
+      </span>
+    </button>
+  </div>
+</td>
                   <td style={{ padding: '16px', textAlign: 'center' }}>
                     <span style={{
                       background: canEdit ? '#10b981' : '#94a3b8',
@@ -1627,6 +1647,145 @@ if (!token || role !== 'sub_admin') {
     )}
   </div>
 )}
+      {/* ========== Popup الإجراءات للتقارير ========== */}
+      {activeReportDropdown && (
+        <>
+          {/* Overlay شفاف لإغلاق الـ Popup */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9998,
+            }}
+            onClick={() => setActiveReportDropdown(null)}
+          />
+          
+          {/* نافذة الـ Popup نفسها */}
+          <div
+            style={{
+              position: 'fixed',
+              top: reportPopupPosition.top,
+              left: reportPopupPosition.left,
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              zIndex: 9999,
+              minWidth: '250px',
+              border: '1px solid #edf2f7',
+              overflow: 'hidden'
+            }}
+          >
+            {/* عنوان الـ Popup */}
+            <div style={{
+              padding: '16px 20px',
+              background: '#f8fafc',
+              borderBottom: '1px solid #edf2f7',
+              textAlign: 'center',
+              fontWeight: '600',
+              color: '#1a2634',
+              fontSize: '16px'
+            }}>
+              الإجراءات المتاحة
+            </div>
+            
+            {/* عرض التقرير */}
+            <div
+              onClick={() => {
+                const report = myReports.find(r => r.id === activeReportDropdown);
+                if (report) {
+                  setSelectedReport(report);
+                  fetchReportDetails(report.id);
+                }
+                setActiveReportDropdown(null);
+              }}
+              style={{
+                padding: '14px 20px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #f1f5f9',
+                color: '#2d3e50',
+                fontSize: '14px',
+                textAlign: 'center',
+                transition: 'all 0.2s ease',
+                fontWeight: '500'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            >
+              عرض التقرير
+            </div>
+            
+            {/* تعديل - يظهر فقط إذا كان التقرير نشط (أقل من 24 ساعة) */}
+            {myReports.find(r => r.id === activeReportDropdown) && 
+             checkReportEditPermission(myReports.find(r => r.id === activeReportDropdown)?.created_at) && (
+              <div
+                onClick={() => {
+                  const report = myReports.find(r => r.id === activeReportDropdown);
+                  if (report) {
+                    navigate(`/project-report/${report.project_id}`, {
+                      state: {
+                        reportId: report.id,
+                        isEdit: true,
+                        reportData: report,
+                        projectData: report.project
+                      }
+                    });
+                  }
+                  setActiveReportDropdown(null);
+                }}
+                style={{
+                  padding: '14px 20px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #f1f5f9',
+                  color: '#f59e0b',
+                  fontSize: '14px',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease',
+                  fontWeight: '500'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#fef3c7'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                تعديل
+              </div>
+            )}
+            
+            {/* زر إغلاق في الأسفل */}
+            <div style={{
+              padding: '12px 20px',
+              borderTop: '1px solid #edf2f7',
+              textAlign: 'center',
+              background: '#f8fafc'
+            }}>
+              <button
+                onClick={() => setActiveReportDropdown(null)}
+                style={{
+                  padding: '6px 20px',
+                  background: 'transparent',
+                  color: '#64748b',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f1f5f9';
+                  e.target.style.borderColor = '#94a3b8';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.borderColor = '#e2e8f0';
+                }}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </>
+      )}
       </div>
 
       <style>{`

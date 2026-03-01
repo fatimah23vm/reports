@@ -9,15 +9,7 @@ const { requireAuth, subAdminOnly } = require('../middlewares/authMiddleware');
 // إضافة مادة
 router.post('/:dailyReportId', requireAuth, subAdminOnly, async (req, res) => {
   const { dailyReportId } = req.params;
-  const {
-    material_name,
-    material_type,
-    quantity,
-    storage_location,
-    supplier_name,
-    supplier_contact,
-    supply_location
-  } = req.body;
+  const { material_name, material_type, quantity, storage_location, supplier_name, supplier_contact, supply_location } = req.body;
 
   if (!material_name) {
     return res.status(400).json({ message: 'material_name is required' });
@@ -25,31 +17,20 @@ router.post('/:dailyReportId', requireAuth, subAdminOnly, async (req, res) => {
 
   try {
     const report = await client.query(
-      'SELECT status FROM daily_reports WHERE id = $1',
+      'SELECT * FROM daily_reports WHERE id=$1',
       [dailyReportId]
     );
 
-    if (report.rows.length === 0)
-      return res.status(404).json({ message: 'Daily report not found' });
+    if (report.rows.length === 0) return res.status(404).json({ message: 'Daily report not found' });
 
-    if (report.rows[0].status === 'submitted')
-      return res.status(403).json({ message: 'Report already submitted' });
+    // ✅ لم نعد نتحقق من حالة التقرير هنا
 
     const result = await client.query(
       `INSERT INTO materials
        (daily_report_id, material_name, material_type, quantity, storage_location, supplier_name, supplier_contact, supply_location)
        VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
        RETURNING *`,
-      [
-        dailyReportId,
-        material_name,
-        material_type || null,
-        quantity || 0,
-        storage_location || null,
-        supplier_name || null,
-        supplier_contact || null,
-        supply_location || null
-      ]
+      [dailyReportId, material_name, material_type || null, quantity || 0, storage_location || null, supplier_name || null, supplier_contact || null, supply_location || null]
     );
 
     res.status(201).json(result.rows[0]);

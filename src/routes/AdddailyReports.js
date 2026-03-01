@@ -8,6 +8,30 @@ const { requireAuth, subAdminOnly } = require('../middlewares/authMiddleware');
 // ========== للتصحيح - يتأكد أن الراوتر شغال ==========
 console.log('✅ Loading daily reports routes...');
 
+// ========== جلب جميع التقارير (للمدير) ==========
+router.get('/all-reports', requireAuth, async (req, res) => {
+  console.log('📋 Fetching all reports');
+  try {
+    const result = await client.query(
+      `SELECT dr.*, 
+              orr.report_number as project_report_number, 
+              orr.owner_name, 
+              orr.location, 
+              orr.company_name,
+              orr.engineer_name,
+              orr.id as project_id
+       FROM daily_reports dr
+       JOIN owner_reports orr ON dr.project_id = orr.id
+       ORDER BY dr.created_at DESC`
+    );
+
+    res.json({ reports: result.rows });
+  } catch (err) {
+    console.error('Error fetching all reports:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ✅ ========== أولاً: الراوات المحددة (specific routes) ==========
 
 // جلب تقرير اليوم أو إنشاؤه (للمهندس)
@@ -146,6 +170,52 @@ router.get('/project/:projectId/submitted', requireAuth, async (req, res) => {
   }
 });
 
+// ✅ ========== جلب تقارير مهندس معين (للداشبورد) ==========
+router.get('/engineer/:username/reports', requireAuth, async (req, res) => {
+  console.log('📋 Fetching reports for engineer:', req.params.username);
+  const { username } = req.params;
+
+  try {
+    const result = await client.query(
+      `SELECT dr.*, 
+              orr.report_number as project_report_number, 
+              orr.owner_name, 
+              orr.location, 
+              orr.company_name,
+              orr.id as project_id
+       FROM daily_reports dr
+       JOIN owner_reports orr ON dr.project_id = orr.id
+       WHERE orr.engineer_name = $1
+       ORDER BY dr.created_at DESC`,
+      [username]
+    );
+
+    // تنسيق البيانات لتتناسب مع ما يتوقعه الفرونت إند
+    const formattedReports = result.rows.map(report => ({
+      id: report.id,
+      project_id: report.project_id,
+      report_date: report.report_date,
+      report_number: report.report_number,
+      status: report.status,
+      created_at: report.created_at,
+      submitted_at: report.submitted_at,
+      created_by: report.created_by,
+      project: {
+        id: report.project_id,
+        report_number: report.project_report_number,
+        owner_name: report.owner_name,
+        location: report.location,
+        company_name: report.company_name
+      }
+    }));
+
+    res.json({ reports: formattedReports });
+  } catch (err) {
+    console.error('Error fetching engineer reports:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ✅ ========== ثانياً: الراوات الديناميكية (dynamic routes) ==========
 
 // جلب تقرير محدد
@@ -236,6 +306,62 @@ router.put('/:reportId/submit', requireAuth, subAdminOnly, async (req, res) => {
   }
 });
 
+// ✅ ========== إنشاء تقرير جديد ==========
+router.post('/project/:projectId', requireAuth, subAdminOnly, async (req, res) => {
+  console.log('📝 Creating new daily report for project:', req.params.projectId);
+  const { projectId } = req.params;
+  const today = new Date().toISOString().split('T')[0];
+
+  try {
+    // تحقق من وجود المشروع
+    const project = await client.query(
+      'SELECT report_number FROM owner_reports WHERE id = $1',
+      [projectId]
+    );
+
+    if (project.rows.length === 0) {
+      return res.status(404).json({ message: 'المشروع غير موجود' });
+    }
+
+    // تحقق إذا كان فيه تقرير لليوم موجود مسبقاً
+    const existingReport = await client.query(
+      `SELECT * FROM daily_reports 
+       WHERE project_id = $1 AND report_date = $2`,
+      [projectId, today]
+    );
+
+    if (existingReport.rows.length > 0) {
+      return res.status(400).json({ 
+        message: 'يوجد تقرير لهذا اليوم مسبقاً',
+        report: existingReport.rows[0]
+      });
+    }
+
+    // إنشاء رقم التقرير
+    const projectNumber = project.rows[0].report_number;
+    const reportNumber = `${projectNumber}-${today.replace(/-/g, '')}`;
+
+    // إنشاء التقرير الجديد
+    const newReport = await client.query(
+      `INSERT INTO daily_reports 
+       (project_id, report_date, report_number, created_by, status, created_at)
+       VALUES ($1, $2, $3, $4, 'draft', CURRENT_TIMESTAMP)
+       RETURNING *`,
+      [projectId, today, reportNumber, req.user.username]
+    );
+
+    console.log('✅ Report created successfully:', newReport.rows[0].id);
+    res.status(201).json({ 
+      message: '✅ تم إنشاء التقرير بنجاح', 
+      report: newReport.rows[0] 
+    });
+
+  } catch (err) {
+    console.error('❌ Error creating report:', err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // حذف تقرير (المهندس فقط)
 router.delete('/:reportId', requireAuth, subAdminOnly, async (req, res) => {
   const { reportId } = req.params;
@@ -268,11 +394,15 @@ router.delete('/:reportId', requireAuth, subAdminOnly, async (req, res) => {
 });
 
 console.log('✅ Daily reports routes loaded successfully');
+console.log('  - /all-reports'); // <-- أضف هذا السطر
 console.log('  - /project/:projectId/today');
 console.log('  - /project/:projectId/all');
 console.log('  - /project/:projectId/latest');
 console.log('  - /project/:projectId/latest-submitted');
 console.log('  - /project/:projectId/submitted');
+console.log('  - /engineer/:username/reports');
+console.log('  - POST /project/:projectId');
+console.log('  - /:reportId (GET, PUT, DELETE)');
+console.log('  - /:reportId/submit (PUT)');
 
 module.exports = router;
-///Users/fatimahadeeb/Desktop/reports/src/routes/AdddailyReports.js

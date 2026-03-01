@@ -2,8 +2,8 @@
 ///Users/fatimahadeeb/Desktop/reports/frontend/src/pages/ProjectReport.jsx
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate , useLocation} from 'react-router-dom';
-import { jsPDF } from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import html2pdf from 'html2pdf.js';
+
 import '@fortawesome/fontawesome-free/css/all.min.css';
 
 const ProjectReport = () => {
@@ -805,211 +805,65 @@ const { isNewReport, projectData: passedProjectData, viewOnly, viewMode, reportI
     }
   };
 
-  // ========== Generate PDF ==========
-  const handleGeneratePDF = async () => {
-    setIsGeneratingPDF(true);
+// ========== Generate PDF using html2pdf ==========
+const handleGeneratePDF = async () => {
+  setIsGeneratingPDF(true);
+  
+  try {
+    // ✅ تحديد عنصر التقرير
+    const element = document.querySelector('.report-content');
     
-    try {
-      const doc = new jsPDF('p', 'pt', 'a4');
-      
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(20);
-      doc.setTextColor(45, 62, 80);
-      doc.text(`تقرير المشروع - ${project.report_number}`, 40, 40);
-      
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(12);
-      doc.setTextColor(100, 116, 139);
-      doc.text(`المالك: ${project.owner_name}`, 40, 80);
-      doc.text(`الشركة: ${project.company_name}`, 40, 105);
-      doc.text(`الموقع: ${project.location}`, 40, 130);
-      doc.text(`المهندس المسؤول: ${project.engineer_name}`, 40, 155);
-      doc.text(`تاريخ التقرير: ${new Date().toLocaleDateString('en-US')}`, 40, 180);
-      
-      let yPosition = 220;
-      
-      if (workItems.length > 0) {
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(45, 62, 80);
-        doc.text('الأعمال الجارية', 40, yPosition);
-        yPosition += 20;
-        
-        const tableColumn = ['#', 'البند', 'منطقة العمل', 'عدد العمال', 'الكمية'];
-        const tableRows = workItems.map((item, index) => [
-          index + 1,
-          item.item_name,
-          item.work_area,
-          item.workers_count || 0,
-          item.quantity || 0
-        ]);
-        
-        autoTable(doc, {
-          startY: yPosition,
-          head: [tableColumn],
-          body: tableRows,
-          theme: 'grid',
-          styles: { 
-            font: 'helvetica', 
-            fontSize: 10,
-            halign: 'center',
-            valign: 'middle'
-          },
-          headStyles: { 
-            fillColor: [45, 62, 80],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold'
-          },
-          alternateRowStyles: {
-            fillColor: [248, 250, 252]
-          }
-        });
-        
-        yPosition = doc.lastAutoTable.finalY + 30;
-      }
-      
-      if (nextDayPlans.length > 0) {
-        if (yPosition > 700) {
-          doc.addPage();
-          yPosition = 40;
-        }
-        
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(45, 62, 80);
-        doc.text('خطة اليوم التالي', 40, yPosition);
-        yPosition += 20;
-        
-        nextDayPlans.forEach((plan, index) => {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          doc.setTextColor(71, 85, 105);
-          
-          const lines = doc.splitTextToSize(`${index + 1}. ${plan.description}`, 500);
-          doc.text(lines, 40, yPosition);
-          yPosition += lines.length * 20 + 10;
-        });
-        
-        yPosition += 20;
-      }
-      
-      if (materials.length > 0) {
-        if (yPosition > 700) {
-          doc.addPage();
-          yPosition = 40;
-        }
-        
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(45, 62, 80);
-        doc.text('المواد المستخدمة', 40, yPosition);
-        yPosition += 20;
-        
-        const tableColumn = ['اسم الخامة', 'النوع', 'الكمية', 'مكان التخزين', 'المورد'];
-        const tableRows = materials.map(material => [
-          material.material_name,
-          material.material_type || '-',
-          material.quantity || 0,
-          material.storage_location || '-',
-          material.supplier_name || '-'
-        ]);
-        
-        autoTable(doc, {
-          startY: yPosition,
-          head: [tableColumn],
-          body: tableRows,
-          theme: 'grid',
-          styles: { 
-            font: 'helvetica', 
-            fontSize: 9,
-            halign: 'center',
-            valign: 'middle'
-          },
-          headStyles: { 
-            fillColor: [45, 62, 80],
-            textColor: [255, 255, 255],
-            fontStyle: 'bold'
-          },
-          alternateRowStyles: {
-            fillColor: [248, 250, 252]
-          }
-        });
-        
-        yPosition = doc.lastAutoTable.finalY + 30;
-      }
-      
-      if (siteImages.length > 0) {
-        if (yPosition > 700) {
-          doc.addPage();
-          yPosition = 40;
-        }
-        
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(45, 62, 80);
-        doc.text('صور الموقع', 40, yPosition);
-        yPosition += 20;
-        
-        siteImages.forEach((image, index) => {
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          doc.setTextColor(71, 85, 105);
-          doc.text(`صورة ${index + 1} - ${new Date(image.uploaded_at).toLocaleDateString('en-US')}`, 40, yPosition);
-          yPosition += 15;
-          
-          doc.setTextColor(37, 99, 235);
-          doc.textWithLink('عرض الصورة', 40, yPosition, { url: `http://localhost:3000/${image.image_path}` });
-          doc.setTextColor(71, 85, 105);
-          yPosition += 25;
-        });
-        
-        yPosition += 10;
-      }
-      
-      if (signatures.length > 0) {
-        if (yPosition > 700) {
-          doc.addPage();
-          yPosition = 40;
-        }
-        
-        doc.setFont('helvetica', 'bold');
-        doc.setFontSize(14);
-        doc.setTextColor(45, 62, 80);
-        doc.text('التوقيع', 40, yPosition);
-        yPosition += 20;
-        
-        signatures.forEach((signature) => {
-          doc.setFont('helvetica', 'bold');
-          doc.setFontSize(11);
-          doc.setTextColor(45, 62, 80);
-          doc.text(signature.signed_by, 40, yPosition);
-          yPosition += 15;
-          
-          doc.setFont('helvetica', 'normal');
-          doc.setFontSize(11);
-          doc.setTextColor(71, 85, 105);
-          const lines = doc.splitTextToSize(signature.signature_data, 500);
-          doc.text(lines, 40, yPosition);
-          yPosition += lines.length * 20 + 10;
-          
-          doc.setFont('helvetica', 'italic');
-          doc.setFontSize(9);
-          doc.setTextColor(148, 163, 184);
-          doc.text(`تاريخ التوقيع: ${new Date(signature.signed_at).toLocaleDateString('en-US')}`, 40, yPosition);
-          yPosition += 30;
-        });
-      }
-      
-      doc.save(`Project-Report-${project.report_number}.pdf`);
-      alert('✅ تم تحميل التقرير بنجاح');
-      
-    } catch (error) {
-      console.error('❌ Error generating PDF:', error);
-      alert('❌ فشل في إنشاء ملف PDF: ' + error.message);
-    } finally {
-      setIsGeneratingPDF(false);
+    if (!element) {
+      alert('لم يتم العثور على محتوى التقرير');
+      return;
     }
-  };
+
+    // ✅ إنشاء اسم الملف
+    const fileName = project?.report_number || 'Project-Report';
+
+    // ✅ ضبط اتجاه النص وإضافة أنماط للعربية
+    element.setAttribute('dir', 'rtl');
+    element.style.direction = 'rtl';
+    element.style.textAlign = 'right';
+    element.style.fontFamily = 'Arial, sans-serif';
+
+    // ✅ إضافة أنماط إضافية للجداول
+    const tables = element.querySelectorAll('table');
+    tables.forEach(table => {
+      table.style.direction = 'rtl';
+      table.style.textAlign = 'right';
+    });
+
+    // ✅ إعدادات html2pdf
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `Report_${fileName}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        logging: false
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
+
+    // ✅ تحميل PDF
+    await html2pdf().set(opt).from(element).save();
+    
+    alert('✅ تم تحميل التقرير بنجاح');
+    
+  } catch (error) {
+    console.error('❌ Error generating PDF:', error);
+    alert('❌ فشل في إنشاء ملف PDF: ' + error.message);
+  } finally {
+    setIsGeneratingPDF(false);
+  }
+};
 
   // ========== ✅ إرسال التقرير ==========
   const handleSubmitReport = async () => {
@@ -1129,7 +983,7 @@ useEffect(() => {
   if (!project) return <div style={{ padding: '40px', textAlign: 'center' }}>المشروع غير موجود</div>;
 
   return (
-    <div style={{
+     <div className="report-content" style={{
       padding: '32px',
       background: '#f5f7fa',
       minHeight: '100vh',
@@ -1149,26 +1003,7 @@ useEffect(() => {
         flexDirection: 'row'
       }} dir="ltr">
         <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={handleGeneratePDF}
-            disabled={isGeneratingPDF}
-            style={{
-              padding: '10px 20px',
-              background: isGeneratingPDF ? '#94a3b8' : '#2d3e50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '30px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: isGeneratingPDF ? 'wait' : 'pointer',
-              transition: 'all 0.2s ease',
-              opacity: isGeneratingPDF ? 0.7 : 1
-            }}
-            onMouseEnter={(e) => !isGeneratingPDF && (e.target.style.background = '#1a2634')}
-            onMouseLeave={(e) => !isGeneratingPDF && (e.target.style.background = '#2d3e50')}
-          >
-            {isGeneratingPDF ? 'جاري التحميل...' : 'تحميل PDF'}
-          </button>
+         
           <button
             onClick={() => navigate(-1)}
             style={{
@@ -3242,27 +3077,7 @@ useEffect(() => {
           >
             {isSubmitting ? 'جاري الإرسال...' : !canEdit ? 'التعديل مغلق' : 'إرسال التقرير'}
           </button>
-          
-          <button
-            onClick={handleGeneratePDF}
-            disabled={isGeneratingPDF}
-            style={{
-              padding: '14px 40px',
-              background: isGeneratingPDF ? '#94a3b8' : '#2d3e50',
-              color: 'white',
-              border: 'none',
-              borderRadius: '30px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: isGeneratingPDF ? 'wait' : 'pointer',
-              transition: 'all 0.2s ease',
-              opacity: isGeneratingPDF ? 0.7 : 1
-            }}
-            onMouseEnter={(e) => !isGeneratingPDF && (e.target.style.background = '#1a2634')}
-            onMouseLeave={(e) => !isGeneratingPDF && (e.target.style.background = '#2d3e50')}
-          >
-            {isGeneratingPDF ? 'جاري التحميل...' : 'تحميل PDF'}
-          </button>
+        
         </div>
       </div>
     </div>

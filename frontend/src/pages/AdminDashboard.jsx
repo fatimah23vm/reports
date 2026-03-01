@@ -1,9 +1,8 @@
 
 
-
-
 // src/pages/AdminDashboard.jsx
 import React, { useEffect, useState, useCallback } from 'react';
+import html2pdf from 'html2pdf.js';
 
 const AdminDashboard = () => {
   // ========== State المستخدمين ==========
@@ -55,7 +54,45 @@ const [popupPosition, setPopupPosition] = useState({ top: 0, left: 0 });
 const [allReports, setAllReports] = useState([]);
 const [isLoadingAllReports, setIsLoadingAllReports] = useState(false);
 
+// ========== دالة تحميل التقرير كـ PDF ==========
+const handleDownloadPDF = () => {
+  if (!reportDetails) return;
 
+  try {
+    // تحديد عنصر التقرير
+    const element = document.querySelector('.report-content');
+    
+    if (!element) {
+      alert('لم يتم العثور على محتوى التقرير');
+      return;
+    }
+    
+    // إعدادات التحميل
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `Report_${reportDetails.report_number || 'Project'}.pdf`,
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        logging: false
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
+    element.setAttribute('dir', 'rtl');
+    // تحميل PDF
+    html2pdf().set(opt).from(element).save();
+    
+  } catch (error) {
+    console.error('خطأ في إنشاء PDF:', error);
+    alert('حدث خطأ أثناء إنشاء ملف PDF');
+  }
+};
 
 // ========== دالة toggle للقائمة المنسدلة مع تحديد موقع الـ Popup ==========
 const toggleDropdown = (projectId, event) => {
@@ -75,7 +112,6 @@ const toggleDropdown = (projectId, event) => {
   }
 };
 
-// ========== إغلاق القائمة المنسدلة عند الضغط خارجها ==========
 // ========== إغلاق القائمة المنسدلة عند الضغط خارجها ==========
 useEffect(() => {
   const handleClickOutside = (event) => {
@@ -181,52 +217,6 @@ const checkReportEditPermission = (createdAt) => {
       setDeleteMessage({ type: 'error', text: 'فشل الاتصال بالسيرفر' });
     }
   };
-
-
-// ========== جلب تفاصيل تقرير معين (مثل SubAdminDashboard) ==========
-// const fetchReportDetailsById = async (reportId) => {
-//   try {
-//     setIsLoadingReport(true);
-//     const token = localStorage.getItem('token');
-
-//     const [workItemsRes, plansRes, materialsRes, imagesRes, signaturesRes] = await Promise.all([
-//       fetch(`http://localhost:3000/work-items/${reportId}`, {
-//         headers: { 'Authorization': `Bearer ${token}` }
-//       }),
-//       fetch(`http://localhost:3000/next-day-plans/${reportId}`, {
-//         headers: { 'Authorization': `Bearer ${token}` }
-//       }),
-//       fetch(`http://localhost:3000/materials/${reportId}`, {
-//         headers: { 'Authorization': `Bearer ${token}` }
-//       }),
-//       fetch(`http://localhost:3000/site-images/${reportId}`, {
-//         headers: { 'Authorization': `Bearer ${token}` }
-//       }),
-//       fetch(`http://localhost:3000/signatures/${reportId}`, {
-//         headers: { 'Authorization': `Bearer ${token}` }
-//       })
-//     ]);
-
-//     const workItemsData = await workItemsRes.json();
-//     const plansData = await plansRes.json();
-//     const materialsData = await materialsRes.json();
-//     const imagesData = await imagesRes.json();
-//     const signaturesData = await signaturesRes.json();
-
-//     setWorkItems(Array.isArray(workItemsData) ? workItemsData : workItemsData.work_items || []);
-//     setNextDayPlans(Array.isArray(plansData) ? plansData : plansData.next_day_plans || []);
-//     setMaterials(Array.isArray(materialsData) ? materialsData : materialsData.materials || []);
-//     setSiteImages(Array.isArray(imagesData) ? imagesData : imagesData.images || []);
-//     setSignatures(Array.isArray(signaturesData) ? signaturesData : signaturesData.signatures || []);
-
-//     console.log('✅ تم جلب تفاصيل التقرير بنجاح');
-
-//   } catch (error) {
-//     console.error('خطأ في جلب تفاصيل التقرير:', error);
-//   } finally {
-//     setIsLoadingReport(false);
-//   }
-// };
 
 const fetchReportDetailsById = async (reportId) => {
   try {
@@ -1719,7 +1709,7 @@ useEffect(() => {
 />
 </div>
                 <div>
-                  <label style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px', textAlign: 'right',   flexDirection: 'row-reverse', display: 'block' }}>عدد العمال</label>
+                  <label style={{ fontSize: '13px', fontWeight: '500', color: '#475569', marginBottom: '6px', textAlign: 'right', display: 'block' }}>عدد العمال</label>
                   <input 
                     type="number" 
                     min="1" 
@@ -2471,8 +2461,8 @@ useEffect(() => {
               </button>
             </div>
 
-            {/* محتوى التقرير */}
-            <div style={{ padding: '32px' }}>
+            {/* محتوى التقرير - بدون أزرار */}
+            <div className="report-content" style={{ padding: '32px' }}>
               
               {/* معلومات المشروع الأساسية */}
               <div style={{
@@ -2506,7 +2496,7 @@ useEffect(() => {
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>التاريخ</div>
-                    <div style={{ fontSize: '14px', color: '#475569' }}>{new Date(reportDetails.report_date).toLocaleDateString('ar-SA')}</div>
+                    <div style={{ fontSize: '14px', color: '#475569' }}>{new Date(reportDetails.report_date).toLocaleDateString('en-US')}</div>
                   </div>
                   <div>
                     <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>الحالة</div>
@@ -2524,11 +2514,7 @@ useEffect(() => {
                   </div>
                 </div>
               </div>
-               {console.log('📊 workItems في الـ Modal:', workItems)}
-{console.log('📊 nextDayPlans في الـ Modal:', nextDayPlans)}
-{console.log('📊 materials في الـ Modal:', materials)}
-{console.log('📊 siteImages في الـ Modal:', siteImages)}
-{console.log('📊 signatures في الـ Modal:', signatures)}
+
               {/* 1️⃣ الأعمال الجارية */}
               <div style={{ marginBottom: '32px' }}>
                 <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#1a2634', marginBottom: '16px' }}>الأعمال الجارية</h4>
@@ -2645,7 +2631,7 @@ useEffect(() => {
                         />
                         <div style={{ padding: '8px', textAlign: 'center' }}>
                           <span style={{ fontSize: '10px', color: '#94a3b8' }}>
-                            {new Date(image.uploaded_at).toLocaleDateString('ar-SA')}
+                            {new Date(image.uploaded_at).toLocaleDateString('en-US')}
                           </span>
                         </div>
                       </div>
@@ -2673,7 +2659,7 @@ useEffect(() => {
                         <div style={{ fontWeight: '600', color: '#1a2634', marginBottom: '8px' }}>{signature.signed_by}</div>
                         <div style={{ color: '#475569', fontSize: '14px', marginBottom: '4px' }}>{signature.signature_data}</div>
                         <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                          {new Date(signature.signed_at).toLocaleDateString('ar-SA')}
+                          {new Date(signature.signed_at).toLocaleDateString('en-US')}
                         </div>
                       </div>
                     ))}
@@ -2683,28 +2669,52 @@ useEffect(() => {
                 )}
               </div>
 
-              {/* زر الإغلاق في الأسفل */}
-              <div style={{ display: 'flex', justifyContent: 'center', marginTop: '32px' }}>
-                <button
-                  onClick={() => setShowReportModal(false)}
-                  style={{
-                    padding: '12px 40px',
-                    background: '#2d3e50',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '30px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => e.target.style.background = '#1a2634'}
-                  onMouseLeave={(e) => e.target.style.background = '#2d3e50'}
-                >
-                  إغلاق
-                </button>
-              </div>
+            </div> {/* نهاية report-content */}
+
+            {/* أزرار الإجراءات - خارج report-content عشان ما تتصور */}
+            <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', padding: '32px' }}>
+              <button
+                onClick={handleDownloadPDF}
+                style={{
+                  padding: '12px 40px',
+                  background: '#059669',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '30px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#047857'}
+                onMouseLeave={(e) => e.target.style.background = '#059669'}
+              >
+                <span></span>
+                تحميل PDF
+              </button>
+              <button
+                onClick={() => setShowReportModal(false)}
+                style={{
+                  padding: '12px 40px',
+                  background: '#2d3e50',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '30px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.target.style.background = '#1a2634'}
+                onMouseLeave={(e) => e.target.style.background = '#2d3e50'}
+              >
+                إغلاق
+              </button>
             </div>
+
           </div>
         </div>
       )}
@@ -2723,9 +2733,6 @@ useEffect(() => {
           justifyContent: 'center',
           zIndex: 1000
         }}>
-
-
-          
           <div style={{
             background: 'white',
             padding: '24px 40px',
@@ -2746,169 +2753,167 @@ useEffect(() => {
               animation: 'spin 1s linear infinite'
             }}></div>
             جاري تحميل التقرير...
-
-
-            
           </div>
         </div>
-        
       )}
-    {/* ========== Popup الإجراءات ========== */}
-{activeDropdown && (
-  <>
-    {/* Overlay شفاف لإغلاق الـ Popup */}
-    <div
-      style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        zIndex: 9998,
-      }}
-      onClick={() => setActiveDropdown(null)}
-    />
-    
-    {/* نافذة الـ Popup نفسها */}
-    <div
-      style={{
-        position: 'fixed',
-        top: popupPosition.top,
-        left: popupPosition.left,
-        background: 'white',
-        borderRadius: '12px',
-        boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
-        zIndex: 9999,
-        minWidth: '250px',
-        border: '1px solid #edf2f7',
-        overflow: 'hidden'
-      }}
-    >
-      {/* عنوان الـ Popup */}
-      <div style={{
-        padding: '16px 20px',
-        background: '#f8fafc',
-        borderBottom: '1px solid #edf2f7',
-        textAlign: 'center',
-        fontWeight: '600',
-        color: '#1a2634',
-        fontSize: '16px'
-      }}>
-        الإجراءات المتاحة
-      </div>
-      
-      {/* ✅ التحقق إذا كان العنصر مشروع (عرض التقرير فقط للمشاريع) */}
-      {activePage === 'allProjects' && (
-        <div
-          onClick={() => {
-            handleViewReport(activeDropdown);
-            setActiveDropdown(null);
-          }}
-          style={{
-            padding: '14px 20px',
-            cursor: 'pointer',
-            borderBottom: '1px solid #f1f5f9',
-            color: '#2d3e50',
-            fontSize: '14px',
-            textAlign: 'center',
-            transition: 'all 0.2s ease',
-            fontWeight: '500'
-          }}
-          onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-          onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-        >
-          عرض التقرير
-        </div>
+
+      {/* ========== Popup الإجراءات ========== */}
+      {activeDropdown && (
+        <>
+          {/* Overlay شفاف لإغلاق الـ Popup */}
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              zIndex: 9998,
+            }}
+            onClick={() => setActiveDropdown(null)}
+          />
+          
+          {/* نافذة الـ Popup نفسها */}
+          <div
+            style={{
+              position: 'fixed',
+              top: popupPosition.top,
+              left: popupPosition.left,
+              background: 'white',
+              borderRadius: '12px',
+              boxShadow: '0 20px 60px rgba(0,0,0,0.3)',
+              zIndex: 9999,
+              minWidth: '250px',
+              border: '1px solid #edf2f7',
+              overflow: 'hidden'
+            }}
+          >
+            {/* عنوان الـ Popup */}
+            <div style={{
+              padding: '16px 20px',
+              background: '#f8fafc',
+              borderBottom: '1px solid #edf2f7',
+              textAlign: 'center',
+              fontWeight: '600',
+              color: '#1a2634',
+              fontSize: '16px'
+            }}>
+              الإجراءات المتاحة
+            </div>
+            
+            {/* ✅ التحقق إذا كان العنصر مشروع (عرض التقرير فقط للمشاريع) */}
+            {activePage === 'allProjects' && (
+              <div
+                onClick={() => {
+                  handleViewReport(activeDropdown);
+                  setActiveDropdown(null);
+                }}
+                style={{
+                  padding: '14px 20px',
+                  cursor: 'pointer',
+                  borderBottom: '1px solid #f1f5f9',
+                  color: '#2d3e50',
+                  fontSize: '14px',
+                  textAlign: 'center',
+                  transition: 'all 0.2s ease',
+                  fontWeight: '500'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                عرض التقرير
+              </div>
+            )}
+            
+            {/* تعديل - متاح للكل */}
+            <div
+              onClick={() => {
+                // التحقق إذا كان مشروع أو مهندس
+                if (activePage === 'allProjects') {
+                  handleEditProject(activeDropdown);
+                } else if (activePage === 'engineers') {
+                  handleEditEngineer(activeDropdown);
+                }
+                setActiveDropdown(null);
+              }}
+              style={{
+                padding: '14px 20px',
+                cursor: 'pointer',
+                borderBottom: '1px solid #f1f5f9',
+                color: '#2d3e50',
+                fontSize: '14px',
+                textAlign: 'center',
+                transition: 'all 0.2s ease',
+                fontWeight: '500'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            >
+              تعديل
+            </div>
+            
+            {/* حذف - متاح للكل */}
+            <div
+              onClick={() => {
+                if (window.confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
+                  if (activePage === 'allProjects') {
+                    handleDeleteProject(activeDropdown);
+                  } else if (activePage === 'engineers') {
+                    handleDeleteEngineer(activeDropdown);
+                  }
+                }
+                setActiveDropdown(null);
+              }}
+              style={{
+                padding: '14px 20px',
+                cursor: 'pointer',
+                color: '#e53e3e',
+                fontSize: '14px',
+                textAlign: 'center',
+                transition: 'all 0.2s ease',
+                fontWeight: '500'
+              }}
+              onMouseEnter={(e) => e.currentTarget.style.background = '#fff5f5'}
+              onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+            >
+              حذف
+            </div>
+            
+            {/* زر إغلاق في الأسفل */}
+            <div style={{
+              padding: '12px 20px',
+              borderTop: '1px solid #edf2f7',
+              textAlign: 'center',
+              background: '#f8fafc'
+            }}>
+              <button
+                onClick={() => setActiveDropdown(null)}
+                style={{
+                  padding: '6px 20px',
+                  background: 'transparent',
+                  color: '#64748b',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f1f5f9';
+                  e.target.style.borderColor = '#94a3b8';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'transparent';
+                  e.target.style.borderColor = '#e2e8f0';
+                }}
+              >
+                إلغاء
+              </button>
+            </div>
+          </div>
+        </>
       )}
-      
-      {/* تعديل - متاح للكل */}
-      <div
-        onClick={() => {
-          // التحقق إذا كان مشروع أو مهندس
-          if (activePage === 'allProjects') {
-            handleEditProject(activeDropdown);
-          } else if (activePage === 'engineers') {
-            handleEditEngineer(activeDropdown);
-          }
-          setActiveDropdown(null);
-        }}
-        style={{
-          padding: '14px 20px',
-          cursor: 'pointer',
-          borderBottom: '1px solid #f1f5f9',
-          color: '#2d3e50',
-          fontSize: '14px',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          fontWeight: '500'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = '#f8fafc'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-      >
-        تعديل
-      </div>
-      
-      {/* حذف - متاح للكل */}
-      <div
-        onClick={() => {
-          if (window.confirm('هل أنت متأكد من حذف هذا العنصر؟')) {
-            if (activePage === 'allProjects') {
-              handleDeleteProject(activeDropdown);
-            } else if (activePage === 'engineers') {
-              handleDeleteEngineer(activeDropdown);
-            }
-          }
-          setActiveDropdown(null);
-        }}
-        style={{
-          padding: '14px 20px',
-          cursor: 'pointer',
-          color: '#e53e3e',
-          fontSize: '14px',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          fontWeight: '500'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.background = '#fff5f5'}
-        onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-      >
-        حذف
-      </div>
-      
-      {/* زر إغلاق في الأسفل */}
-      <div style={{
-        padding: '12px 20px',
-        borderTop: '1px solid #edf2f7',
-        textAlign: 'center',
-        background: '#f8fafc'
-      }}>
-        <button
-          onClick={() => setActiveDropdown(null)}
-          style={{
-            padding: '6px 20px',
-            background: 'transparent',
-            color: '#64748b',
-            border: '1px solid #e2e8f0',
-            borderRadius: '6px',
-            fontSize: '13px',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.background = '#f1f5f9';
-            e.target.style.borderColor = '#94a3b8';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.background = 'transparent';
-            e.target.style.borderColor = '#e2e8f0';
-          }}
-        >
-          إلغاء
-        </button>
-      </div>
-    </div>
-  </>
-)}
+
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
         * { 
@@ -2941,24 +2946,21 @@ useEffect(() => {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
-          .full-width {
-  width: 100%;
-}
-
-.react-datepicker {
-  font-family: 'Inter', sans-serif;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-}
-
-.react-datepicker__header {
-  background-color: #f8fafc;
-  border-bottom: 1px solid #e2e8f0;
-}
-
-.react-datepicker__day--selected {
-  background-color: #2d3e50 !important;
-}
+        .full-width {
+          width: 100%;
+        }
+        .react-datepicker {
+          font-family: 'Inter', sans-serif;
+          border-radius: 12px;
+          border: 1px solid #e2e8f0;
+        }
+        .react-datepicker__header {
+          background-color: #f8fafc;
+          border-bottom: 1px solid #e2e8f0;
+        }
+        .react-datepicker__day--selected {
+          background-color: #2d3e50 !important;
+        }
       `}</style>
       
     </div>

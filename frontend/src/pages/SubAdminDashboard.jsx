@@ -3,6 +3,7 @@
 // src/pages/SubAdminDashboard.jsx
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import html2pdf from 'html2pdf.js'; 
 
 const SubAdminDashboard = () => {
   const navigate = useNavigate();
@@ -31,6 +32,66 @@ const [viewOnly, setViewOnly] = useState(false);
 // ========== State للقوائم المنسدلة في التقارير ==========
 const [activeReportDropdown, setActiveReportDropdown] = useState(null);
 const [reportPopupPosition, setReportPopupPosition] = useState({ top: 0, left: 0 });
+
+
+// ========== دالة تحميل التقرير كـ PDF ==========
+
+// ========== دالة تحميل التقرير كـ PDF ==========
+const handleDownloadPDF = () => {
+  if (!selectedReport) {
+    alert('لا يوجد تقرير محدد');
+    return;
+  }
+
+  // ✅ للتشخيص: شوف وش في selectedReport
+  console.log('selectedReport:', selectedReport);
+  console.log('report_number:', selectedReport.report_number);
+  console.log('project:', selectedReport.project);
+
+  try {
+    const element = document.querySelector('.report-content');
+    
+    if (!element) {
+      alert('لم يتم العثور على محتوى التقرير');
+      return;
+    }
+
+    // ✅ جرب عدة مصادر لرقم التقرير
+    const reportNumber = 
+      selectedReport.report_number || 
+      selectedReport.project?.report_number ||
+      selectedReport.project_report_number ||
+      'Report';
+
+    console.log('📝 اسم الملف:', reportNumber);
+
+    // ضبط اتجاه النص
+    element.setAttribute('dir', 'rtl');
+
+    const opt = {
+      margin: [0.5, 0.5, 0.5, 0.5],
+      filename: `تقرير_${reportNumber}.pdf`, // ✅ استخدم العربية في اسم الملف
+      image: { type: 'jpeg', quality: 0.98 },
+      html2canvas: { 
+        scale: 2,
+        useCORS: true,
+        letterRendering: true,
+        logging: true
+      },
+      jsPDF: { 
+        unit: 'in', 
+        format: 'a4', 
+        orientation: 'portrait'
+      }
+    };
+
+    html2pdf().set(opt).from(element).save();
+
+  } catch (error) {
+    console.error('خطأ في إنشاء PDF:', error);
+    alert('حدث خطأ أثناء إنشاء ملف PDF');
+  }
+};
 
 // ========== دالة toggle للقائمة المنسدلة للتقارير ==========
 const toggleReportDropdown = (reportId, event) => {
@@ -1214,437 +1275,485 @@ if (!token || role !== 'sub_admin') {
       </button>
     </div>
 
-    {/* معلومات المشروع - بدون قيم افتراضية ثابتة */}
-    <div style={{
-      background: '#f8fafc',
-      borderRadius: '12px',
-      padding: '24px',
-      marginBottom: '32px',
-      border: '1px solid #e2e8f0'
-    }}>
-      <h3 style={{
-        fontSize: '16px',
-        fontWeight: '600',
-        color: '#1a2634',
-        margin: '0 0 16px 0',
-        paddingBottom: '12px',
-        borderBottom: '2px solid #2d3e50',
-        textAlign: 'right'
-      }}>
-        معلومات المشروع
-      </h3>
+    {/* محتوى التقرير المراد تصويره */}
+    <div className="report-content">
       
+      {/* معلومات المشروع */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(4, 1fr)',
-        gap: '20px'
+        background: '#f8fafc',
+        borderRadius: '12px',
+        padding: '24px',
+        marginBottom: '32px',
+        border: '1px solid #e2e8f0'
       }}>
-        {/* رقم المشروع */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>رقم المشروع</div>
-          <div style={{ fontSize: '16px', fontWeight: '700', color: '#2d3e50' }}>
-            {selectedReport.project?.report_number
-              ? selectedReport.project.report_number.split('-').slice(0, 2).join('-')
-              : selectedReport.report_number
-                ? selectedReport.report_number.split('-').slice(0, 2).join('-')
-                : 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* المالك */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>المالك</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.owner_name || 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* الشركة */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>الشركة</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.company_name || 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* الموقع */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>الموقع</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.location || selectedReport.location || 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* المهندس */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>المهندس</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.engineer_name || user?.username || 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* تاريخ المشروع */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>تاريخ المشروع</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.report_date 
-              ? new Date(selectedReport.project.report_date).toLocaleDateString('en-US') 
-              : 'غير متوفر'}
-          </div>
-        </div>
-
-        {/* عدد العمال */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>عدد العمال</div>
-          <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
-            {selectedReport.project?.workers_count || 'غير متوفر'}
-          </div>
-        </div>
+        <h3 style={{
+          fontSize: '16px',
+          fontWeight: '600',
+          color: '#1a2634',
+          margin: '0 0 16px 0',
+          paddingBottom: '12px',
+          borderBottom: '2px solid #2d3e50',
+          textAlign: 'right'
+        }}>
+          معلومات المشروع
+        </h3>
         
-        {/* حالة المشروع */}
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>حالة المشروع</div>
-          <span style={{
-            background: selectedReport.project?.status === 'completed' ? '#f0f9ff' : '#fefce8',
-            color: selectedReport.project?.status === 'completed' ? '#0369a1' : '#854d0e',
-            padding: '4px 12px',
-            borderRadius: '20px',
-            fontSize: '12px',
-            fontWeight: '600',
-            display: 'inline-block',
-            border: selectedReport.project?.status === 'completed' ? '1px solid #bae6fd' : '1px solid #fef9c3'
-          }}>
-            {selectedReport.project?.status === 'completed' ? 'مكتمل' : (selectedReport.project?.status || 'مرسل')}
-          </span>
-        </div>
-      </div>
-    </div>
-
-    {isLoadingReports ? (
-      <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-        <p style={{ color: '#64748b' }}>جاري تحميل تفاصيل التقرير...</p>
-      </div>
-    ) : (
-      <>
-        {/* الأعمال الجارية */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            flexDirection: 'row-reverse'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0,
-              textAlign: 'right',
-              flex: 1,
-              borderBottom: '2px solid #2d3e50',
-              paddingBottom: '10px'
-            }}>
-              الأعمال الجارية
-            </h3>
-            {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
-            {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-              <div style={{ display: 'flex', gap: '10px' }}>
-              
-              </div>
-            )}
-          </div>
-
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>#</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>البند</th>
-                  <th style={{ padding: '12px', textAlign: 'right' }}>منطقة العمل</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>عدد العمال</th>
-                  <th style={{ padding: '12px', textAlign: 'center' }}>الكمية</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportDetails.workItems.length === 0 ? (
-                  <tr>
-                    <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                      لا توجد أعمال جارية
-                    </td>
-                  </tr>
-                ) : (
-                  reportDetails.workItems.map((item, index) => (
-                    <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#64748b' }}>{index + 1}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#1a2634', fontWeight: '500' }}>{item.item_name}</td>
-                      <td style={{ padding: '12px', textAlign: 'right', color: '#475569' }}>{item.work_area}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{item.workers_count}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{item.quantity}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* خطة اليوم التالي */}
-       {/* خطة اليوم التالي */}
-<div style={{ marginBottom: '40px' }}>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '20px',
-    flexDirection: 'row-reverse'
-  }}>
-    <h3 style={{
-      fontSize: '18px',
-      fontWeight: '600',
-      margin: 0,
-      textAlign: 'right',
-      flex: 1,
-      borderBottom: '2px solid #2d3e50',
-      paddingBottom: '10px'
-    }}>
-      خطة اليوم التالي
-    </h3>
-    {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
-    {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-      <div style={{ display: 'flex', gap: '10px' }}>
-    
-      </div>
-    )}
-  </div>
-
-  <div style={{ overflowX: 'auto' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
-      <thead>
-        <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>#</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '80%' }}>الخطة</th>
-          {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>الإجراءات</th>
-          )}
-        </tr>
-      </thead>
-      <tbody>
-        {reportDetails.nextDayPlans.length === 0 ? (
-          <tr>
-            <td colSpan={!viewOnly && checkReportEditPermission(selectedReport.created_at) ? "3" : "2"} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-              لا توجد خطط مضافة
-            </td>
-          </tr>
-        ) : (
-          reportDetails.nextDayPlans.map((plan, index) => (
-            <tr key={plan.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-              <td style={{ padding: '12px', textAlign: 'center', color: '#64748b', verticalAlign: 'middle' }}>
-                {index + 1}
-              </td>
-              <td style={{ padding: '12px', textAlign: 'right', color: '#1a2634', verticalAlign: 'middle' }}>
-                {plan.description}
-              </td>
-              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-                <td style={{ padding: '12px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                   
-                  </div>
-                </td>
-              )}
-            </tr>
-          ))
-        )}
-      </tbody>
-    </table>
-  </div>
-</div>
-        {/* المواد */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            flexDirection: 'row-reverse'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0,
-              textAlign: 'right',
-              flex: 1,
-              borderBottom: '2px solid #2d3e50',
-              paddingBottom: '10px'
-            }}>
-              المواد
-            </h3>
-            {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
-            {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-              <div style={{ display: 'flex', gap: '10px' }}>
-            
-              </div>
-            )}
-          </div>
-          
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>اسم الخامة</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>النوع</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>الكمية</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>مكان التخزين</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>المورد</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>رقم المورد</th>
-                  <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>مكان التوريد</th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportDetails.materials.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-                      لا توجد مواد مضافة
-                    </td>
-                  </tr>
-                ) : (
-                  reportDetails.materials.map(material => (
-                    <tr key={material.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634' }}>{material.material_name}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.material_type || '-'}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.quantity}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.storage_location || '-'}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supplier_name || '-'}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supplier_contact || '-'}</td>
-                      <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supply_location || '-'}</td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-        </div>
-
-        {/* صور الموقع */}
-        <div style={{ marginBottom: '40px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            flexDirection: 'row-reverse'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0,
-              textAlign: 'right',
-              flex: 1,
-              borderBottom: '2px solid #2d3e50',
-              paddingBottom: '10px'
-            }}>
-              صور الموقع
-            </h3>
-            {/* أزرار إضافة وتعديل تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
-            {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-              <div style={{ display: 'flex', gap: '10px' }}>
-            
-              </div>
-            )}
-          </div>
-          
-          {reportDetails.siteImages.length === 0 ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px' }}>
-              لا توجد صور مضافة
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(4, 1fr)',
+          gap: '20px'
+        }}>
+          {/* رقم المشروع */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>رقم المشروع</div>
+            <div style={{ fontSize: '16px', fontWeight: '700', color: '#2d3e50' }}>
+              {selectedReport.project?.report_number
+                ? selectedReport.project.report_number.split('-').slice(0, 2).join('-')
+                : selectedReport.report_number
+                  ? selectedReport.report_number.split('-').slice(0, 2).join('-')
+                  : 'غير متوفر'}
             </div>
-          ) : (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
-              {reportDetails.siteImages.map(image => (
-                <div key={image.id} style={{
+          </div>
+
+          {/* المالك */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>المالك</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.owner_name || 'غير متوفر'}
+            </div>
+          </div>
+
+          {/* الشركة */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>الشركة</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.company_name || 'غير متوفر'}
+            </div>
+          </div>
+
+          {/* الموقع */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>الموقع</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.location || selectedReport.location || 'غير متوفر'}
+            </div>
+          </div>
+
+          {/* المهندس */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>المهندس</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.engineer_name || user?.username || 'غير متوفر'}
+            </div>
+          </div>
+
+          {/* تاريخ المشروع */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>تاريخ المشروع</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.report_date 
+                ? new Date(selectedReport.project.report_date).toLocaleDateString('en-US') 
+                : 'غير متوفر'}
+            </div>
+          </div>
+
+          {/* عدد العمال */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>عدد العمال</div>
+            <div style={{ fontSize: '15px', fontWeight: '500', color: '#1a2634' }}>
+              {selectedReport.project?.workers_count || 'غير متوفر'}
+            </div>
+          </div>
+          
+          {/* حالة المشروع */}
+          <div style={{ textAlign: 'right' }}>
+            <div style={{ fontSize: '12px', color: '#64748b', marginBottom: '4px' }}>حالة المشروع</div>
+            <span style={{
+              background: selectedReport.project?.status === 'completed' ? '#f0f9ff' : '#fefce8',
+              color: selectedReport.project?.status === 'completed' ? '#0369a1' : '#854d0e',
+              padding: '4px 12px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: '600',
+              display: 'inline-block',
+              border: selectedReport.project?.status === 'completed' ? '1px solid #bae6fd' : '1px solid #fef9c3'
+            }}>
+              {selectedReport.project?.status === 'completed' ? 'مكتمل' : (selectedReport.project?.status || 'مرسل')}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {isLoadingReports ? (
+        <div style={{ textAlign: 'center', padding: '60px 20px' }}>
+          <p style={{ color: '#64748b' }}>جاري تحميل تفاصيل التقرير...</p>
+        </div>
+      ) : (
+        <>
+          {/* الأعمال الجارية */}
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexDirection: 'row-reverse'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                textAlign: 'right',
+                flex: 1,
+                borderBottom: '2px solid #2d3e50',
+                paddingBottom: '10px'
+              }}>
+                الأعمال الجارية
+              </h3>
+              {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
+              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+                
+                </div>
+              )}
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                    <th style={{ padding: '12px', textAlign: 'right' }}>#</th>
+                    <th style={{ padding: '12px', textAlign: 'right' }}>البند</th>
+                    <th style={{ padding: '12px', textAlign: 'right' }}>منطقة العمل</th>
+                    <th style={{ padding: '12px', textAlign: 'center' }}>عدد العمال</th>
+                    <th style={{ padding: '12px', textAlign: 'center' }}>الكمية</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportDetails.workItems.length === 0 ? (
+                    <tr>
+                      <td colSpan="5" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                        لا توجد أعمال جارية
+                      </td>
+                    </tr>
+                  ) : (
+                    reportDetails.workItems.map((item, index) => (
+                      <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '12px', textAlign: 'right', color: '#64748b' }}>{index + 1}</td>
+                        <td style={{ padding: '12px', textAlign: 'right', color: '#1a2634', fontWeight: '500' }}>{item.item_name}</td>
+                        <td style={{ padding: '12px', textAlign: 'right', color: '#475569' }}>{item.work_area}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{item.workers_count}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{item.quantity}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* خطة اليوم التالي */}
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexDirection: 'row-reverse'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                textAlign: 'right',
+                flex: 1,
+                borderBottom: '2px solid #2d3e50',
+                paddingBottom: '10px'
+              }}>
+                خطة اليوم التالي
+              </h3>
+              {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
+              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+              
+                </div>
+              )}
+            </div>
+
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>#</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '80%' }}>الخطة</th>
+                    {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                      <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>الإجراءات</th>
+                    )}
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportDetails.nextDayPlans.length === 0 ? (
+                    <tr>
+                      <td colSpan={!viewOnly && checkReportEditPermission(selectedReport.created_at) ? "3" : "2"} style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                        لا توجد خطط مضافة
+                      </td>
+                    </tr>
+                  ) : (
+                    reportDetails.nextDayPlans.map((plan, index) => (
+                      <tr key={plan.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#64748b', verticalAlign: 'middle' }}>
+                          {index + 1}
+                        </td>
+                        <td style={{ padding: '12px', textAlign: 'right', color: '#1a2634', verticalAlign: 'middle' }}>
+                          {plan.description}
+                        </td>
+                        {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                          <td style={{ padding: '12px', textAlign: 'center', verticalAlign: 'middle' }}>
+                            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                             
+                            </div>
+                          </td>
+                        )}
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+          {/* المواد */}
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexDirection: 'row-reverse'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                textAlign: 'right',
+                flex: 1,
+                borderBottom: '2px solid #2d3e50',
+                paddingBottom: '10px'
+              }}>
+                المواد
+              </h3>
+              {/* الأزرار تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
+              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+              
+                </div>
+              )}
+            </div>
+            
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                <thead>
+                  <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>اسم الخامة</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>النوع</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>الكمية</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>مكان التخزين</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>المورد</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>رقم المورد</th>
+                    <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600' }}>مكان التوريد</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {reportDetails.materials.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                        لا توجد مواد مضافة
+                      </td>
+                    </tr>
+                  ) : (
+                    reportDetails.materials.map(material => (
+                      <tr key={material.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634' }}>{material.material_name}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.material_type || '-'}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.quantity}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.storage_location || '-'}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supplier_name || '-'}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supplier_contact || '-'}</td>
+                        <td style={{ padding: '12px', textAlign: 'center', color: '#475569' }}>{material.supply_location || '-'}</td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* صور الموقع */}
+          <div style={{ marginBottom: '40px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexDirection: 'row-reverse'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                textAlign: 'right',
+                flex: 1,
+                borderBottom: '2px solid #2d3e50',
+                paddingBottom: '10px'
+              }}>
+                صور الموقع
+              </h3>
+              {/* أزرار إضافة وتعديل تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
+              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+              
+                </div>
+              )}
+            </div>
+            
+            {reportDetails.siteImages.length === 0 ? (
+              <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px' }}>
+                لا توجد صور مضافة
+              </div>
+            ) : (
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
+                {reportDetails.siteImages.map(image => (
+                  <div key={image.id} style={{
+                    background: '#f8fafc',
+                    borderRadius: '10px',
+                    overflow: 'hidden',
+                    border: '1px solid #edf2f7',
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  }}>
+                    <img
+                      src={`http://localhost:3000/${image.image_path}`}
+                      alt="Site"
+                      style={{
+                        width: '100%',
+                        height: '140px',
+                        objectFit: 'cover',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease'
+                      }}
+                      onClick={() => window.open(`http://localhost:3000/${image.image_path}`, '_blank')}
+                      onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+                      onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                    />
+                    <div style={{ padding: '10px', textAlign: 'center', borderTop: '1px solid #edf2f7' }}>
+                      <span style={{ fontSize: '11px', color: '#64748b' }}>
+                        {new Date(image.uploaded_at).toLocaleDateString('en-US')}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* التوقيع */}
+          <div style={{ marginBottom: '20px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              marginBottom: '20px',
+              flexDirection: 'row-reverse'
+            }}>
+              <h3 style={{
+                fontSize: '18px',
+                fontWeight: '600',
+                margin: 0,
+                textAlign: 'right',
+                flex: 1,
+                borderBottom: '2px solid #2d3e50',
+                paddingBottom: '10px'
+              }}>
+                التوقيع
+              </h3>
+              {/* أزرار إضافة وتعديل تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
+              {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
+                <div style={{ display: 'flex', gap: '10px' }}>
+               
+                </div>
+              )}
+            </div>
+            
+            {reportDetails.signatures.length === 0 ? (
+              <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px' }}>
+                لا يوجد توقيع
+              </div>
+            ) : (
+              reportDetails.signatures.map(signature => (
+                <div key={signature.id} style={{
+                  padding: '20px',
                   background: '#f8fafc',
                   borderRadius: '10px',
-                  overflow: 'hidden',
                   border: '1px solid #edf2f7',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
+                  textAlign: 'center',
+                  maxWidth: '400px',
+                  margin: '0 auto'
                 }}>
-                  <img
-                    src={`http://localhost:3000/${image.image_path}`}
-                    alt="Site"
-                    style={{
-                      width: '100%',
-                      height: '140px',
-                      objectFit: 'cover',
-                      cursor: 'pointer',
-                      transition: 'transform 0.2s ease'
-                    }}
-                    onClick={() => window.open(`http://localhost:3000/${image.image_path}`, '_blank')}
-                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
-                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-                  />
-                  <div style={{ padding: '10px', textAlign: 'center', borderTop: '1px solid #edf2f7' }}>
-                    <span style={{ fontSize: '11px', color: '#64748b' }}>
-                      {new Date(image.uploaded_at).toLocaleDateString('en-US')}
-                    </span>
+                  <div style={{ fontWeight: '600', color: '#1a2634', fontSize: '16px', marginBottom: '8px' }}>{signature.signed_by}</div>
+                  <div style={{ color: '#475569', fontSize: '15px', marginBottom: '12px', fontStyle: 'italic' }}>"{signature.signature_data}"</div>
+                  <div style={{ fontSize: '12px', color: '#94a3b8', borderTop: '1px dashed #d1d5db', paddingTop: '10px' }}>
+                    تاريخ التوقيع: {new Date(signature.signed_at).toLocaleDateString('en-US')} - {new Date(signature.signed_at).toLocaleTimeString('en-US')}
                   </div>
                 </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* التوقيع */}
-        <div style={{ marginBottom: '20px' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '20px',
-            flexDirection: 'row-reverse'
-          }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              margin: 0,
-              textAlign: 'right',
-              flex: 1,
-              borderBottom: '2px solid #2d3e50',
-              paddingBottom: '10px'
-            }}>
-              التوقيع
-            </h3>
-            {/* أزرار إضافة وتعديل تظهر فقط إذا لم تكن في وضع viewOnly وكان canEdit = true */}
-            {!viewOnly && checkReportEditPermission(selectedReport.created_at) && (
-              <div style={{ display: 'flex', gap: '10px' }}>
-             
-              </div>
+              ))
             )}
           </div>
-          
-          {reportDetails.signatures.length === 0 ? (
-            <div style={{ padding: '30px', textAlign: 'center', color: '#94a3b8', background: '#f8fafc', borderRadius: '8px' }}>
-              لا يوجد توقيع
-            </div>
-          ) : (
-            reportDetails.signatures.map(signature => (
-              <div key={signature.id} style={{
-                padding: '20px',
-                background: '#f8fafc',
-                borderRadius: '10px',
-                border: '1px solid #edf2f7',
-                textAlign: 'center',
-                maxWidth: '400px',
-                margin: '0 auto'
-              }}>
-                <div style={{ fontWeight: '600', color: '#1a2634', fontSize: '16px', marginBottom: '8px' }}>{signature.signed_by}</div>
-                <div style={{ color: '#475569', fontSize: '15px', marginBottom: '12px', fontStyle: 'italic' }}>"{signature.signature_data}"</div>
-                <div style={{ fontSize: '12px', color: '#94a3b8', borderTop: '1px dashed #d1d5db', paddingTop: '10px' }}>
-                  تاريخ التوقيع: {new Date(signature.signed_at).toLocaleDateString('en-US')} - {new Date(signature.signed_at).toLocaleTimeString('en-US')}
-                </div>
-              </div>
-            ))
-          )}
-        </div>
-      </>
-    )}
+        </>
+      )}
+    </div> {/* نهاية report-content */}
+
+    {/* أزرار الإجراءات - خارج report-content */}
+    <div style={{ display: 'flex', justifyContent: 'center', gap: '16px', marginTop: '32px' }}>
+      <button
+        onClick={handleDownloadPDF}
+        style={{
+          padding: '12px 40px',
+          background: '#059669',
+          color: 'white',
+          border: 'none',
+          borderRadius: '30px',
+          fontSize: '14px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px'
+        }}
+        onMouseEnter={(e) => e.target.style.background = '#047857'}
+        onMouseLeave={(e) => e.target.style.background = '#059669'}
+      >
+        <span>📥</span>
+        تحميل PDF
+      </button>
+      <button
+        onClick={() => setActivePage('myReports')}
+        style={{
+          padding: '12px 40px',
+          background: '#2d3e50',
+          color: 'white',
+          border: 'none',
+          borderRadius: '30px',
+          fontSize: '14px',
+          fontWeight: '500',
+          cursor: 'pointer',
+          transition: 'all 0.2s ease'
+        }}
+        onMouseEnter={(e) => e.target.style.background = '#1a2634'}
+        onMouseLeave={(e) => e.target.style.background = '#2d3e50'}
+      >
+        إغلاق
+      </button>
+    </div>
+
   </div>
 )}
       {/* ========== Popup الإجراءات للتقارير ========== */}

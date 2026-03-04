@@ -232,36 +232,72 @@ const toggleDropdown = (projectId, event) => {
       alert('فشل في جلب بيانات المهندس');
     }
   };
+const handleUpdateEngineer = async (e) => {
+  e.preventDefault();
+  setMessage(''); // مسح أي رسالة سابقة
+  
+  // التحقق من وجود بيانات
+  if (!editingEngineer.username.trim()) {
+    setMessage({ type: 'error', text: 'اسم المستخدم مطلوب' });
+    return;
+  }
 
-  const handleUpdateEngineer = async (e) => {
-    e.preventDefault();
-    try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:3000/users/engineer/${editingEngineer.id}`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          username: editingEngineer.username,
-          password: editingEngineer.password || undefined
-        })
+  try {
+    const token = localStorage.getItem('token');
+    
+    // تجهيز البيانات للإرسال
+    const updateData = {
+      username: editingEngineer.username.trim()
+    };
+    
+    // إرسال كلمة المرور فقط إذا تم إدخالها
+    if (editingEngineer.password && editingEngineer.password.trim() !== '') {
+      updateData.password = editingEngineer.password;
+    }
+
+    const response = await fetch(`http://localhost:3000/users/engineer/${editingEngineer.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(updateData)
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // ✅ رسالة نجاح (بدون أيقونة في النص لأن الأيقونة ستضاف في العرض)
+      setMessage({ 
+        type: 'success', 
+        text: 'تم تحديث بيانات المهندس بنجاح'
       });
-      const data = await response.json();
-      if (response.ok) {
-        setMessage({ type: 'success', text: 'تم تحديث المهندس بنجاح' });
+      
+      // إعادة تحميل قائمة المهندسين
+      await fetchEngineers();
+      
+      // العودة إلى صفحة المهندسين بعد ثانيتين
+      setTimeout(() => {
         setEditingEngineer(null);
         setActivePage('engineers');
-        await fetchEngineers();
-        setTimeout(() => setMessage(''), 3000);
-      } else {
-        setMessage({ type: 'error', text: data.message || 'حدث خطأ' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'فشل الاتصال بالسيرفر' });
+        setMessage(''); // مسح الرسالة بعد الانتقال
+      }, 2000);
+      
+    } else {
+      // رسالة خطأ من السيرفر
+      setMessage({ 
+        type: 'error', 
+        text: data.message || 'حدث خطأ أثناء التحديث' 
+      });
     }
-  };
+  } catch (error) {
+    console.error('❌ خطأ في التحديث:', error);
+    setMessage({ 
+      type: 'error', 
+      text: 'فشل الاتصال بالسيرفر' 
+    });
+  }
+};
 
   // ========== دوال المشاريع ==========
   const fetchProjects = useCallback(async () => {

@@ -5,7 +5,7 @@ const router = express.Router();
 const { requireAuth, adminOnly } = require('../middlewares/authMiddleware');
 const client = require('../config/db');  // ✅ هذا موجود مرة وحدة فقط
 
-// ✅ إضافة مهندس جديد
+//  إضافة مهندس جديد
 router.post('/add-engineer', requireAuth, adminOnly, async (req, res) => {
   const { username, password } = req.body;
 
@@ -38,7 +38,7 @@ router.post('/add-engineer', requireAuth, adminOnly, async (req, res) => {
   }
 });
 
-// ✅ جلب جميع المهندسين
+//  جلب جميع المهندسين
 router.get('/engineers', requireAuth, adminOnly, async (req, res) => {
   try {
     console.log('📊 Fetching engineers...');
@@ -57,7 +57,7 @@ router.get('/engineers', requireAuth, adminOnly, async (req, res) => {
   }
 });
 
-// ✅ جلب مهندس واحد
+//  جلب مهندس واحد
 router.get('/engineer/:id', requireAuth, adminOnly, async (req, res) => {
   const engineerId = req.params.id;
   console.log('🔍 Fetching engineer with ID:', engineerId);
@@ -80,6 +80,68 @@ router.get('/engineer/:id', requireAuth, adminOnly, async (req, res) => {
   } catch (err) {
     console.error('❌ Error fetching engineer:', err.message);
     res.status(500).json({ message: err.message });
+  }
+});
+
+
+// تحديث بيانات مهندس
+router.put('/engineer/:id', requireAuth, adminOnly, async (req, res) => {
+  const engineerId = req.params.id;
+  const { username, password } = req.body;
+
+  // التحقق من وجود اسم مستخدم
+  if (!username) {
+    return res.status(400).json({ message: 'اسم المستخدم مطلوب' });
+  }
+
+  try {
+    //  التحقق من وجود المهندس
+    const userCheck = await client.query(
+      'SELECT * FROM users WHERE id = $1 AND role = $2',
+      [engineerId, 'sub_admin']
+    );
+
+    if (userCheck.rows.length === 0) {
+      return res.status(404).json({ message: 'المهندس غير موجود' });
+    }
+
+    //  إذا تم إرسال كلمة مرور جديدة نشفرها 
+    let hashedPassword = null;
+    if (password && password.trim() !== '') {
+      const bcrypt = require('bcrypt');
+      hashedPassword = await bcrypt.hash(password, 10);
+    }
+
+    //  (تحديث فقط الحقول المرسلة)
+    let updateQuery = 'UPDATE users SET username = $1';
+    const queryParams = [username];
+    let paramIndex = 2;
+
+    if (hashedPassword) {
+      updateQuery += `, password = $${paramIndex}`;
+      queryParams.push(hashedPassword);
+      paramIndex++;
+    }
+
+    updateQuery += ` WHERE id = $${paramIndex} RETURNING id, username, role`;
+    queryParams.push(engineerId);
+
+    //  تنفيذ عملية التحديث
+    const result = await client.query(updateQuery, queryParams);
+
+    console.log('✅ Engineer updated successfully:', result.rows[0]);
+    res.json({
+      message: 'تم تحديث المهندس بنجاح',
+      user: result.rows[0]
+    });
+
+  } catch (err) {
+    console.error('❌ Error updating engineer:', err.message);
+    // التحقق من خطأ وحدة المستخدم المكرر (إذا حاول تغيير اسم المستخدم لاسم موجود مسبقاً)
+    if (err.code === '23505') { // كود خطأ التكرار في PostgreSQL
+      return res.status(400).json({ message: 'اسم المستخدم موجود بالفعل، الرجاء اختيار اسم آخر' });
+    }
+    res.status(500).json({ message: 'حدث خطأ في السيرفر أثناء التحديث' });
   }
 });
 
@@ -107,3 +169,4 @@ router.delete('/engineer/:id', requireAuth, adminOnly, async (req, res) => {
 });
 
 module.exports = router;
+///Users/fatimahadeeb/Desktop/reports/src/routes/addUsers.js

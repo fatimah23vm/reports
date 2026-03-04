@@ -1,5 +1,5 @@
 
-///Users/fatimahadeeb/Desktop/reports/frontend/src/pages/ProjectReport.jsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate , useLocation} from 'react-router-dom';
 import html2pdf from 'html2pdf.js';
@@ -20,6 +20,9 @@ const { isNewReport, projectData: passedProjectData, viewOnly, viewMode, reportI
   const [submitMessage, setSubmitMessage] = useState({ type: '', text: '' });
   const [currentDailyReport, setCurrentDailyReport] = useState(null);
   const [dailyReportId, setDailyReportId] = useState(null);
+  
+  // ========== State للجوال ==========
+  const [isMobile, setIsMobile] = useState(false);
   
   // ✅ States جديدة للصلاحية
   const [canEdit, setCanEdit] = useState(true);
@@ -95,6 +98,15 @@ const { isNewReport, projectData: passedProjectData, viewOnly, viewMode, reportI
   const [editingSignature, setEditingSignature] = useState(null);
   const [editSignatureData, setEditSignatureData] = useState('');
 
+  // ========== كشف حجم الشاشة ==========
+  useEffect(() => {
+    const checkScreen = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    checkScreen();
+    window.addEventListener('resize', checkScreen);
+    return () => window.removeEventListener('resize', checkScreen);
+  }, []);
 
   // ========== 1️⃣ دالة التحقق من صلاحية التعديل ==========
   const checkEditPermission = useCallback((reportCreatedAt) => {
@@ -984,7 +996,7 @@ useEffect(() => {
 
   return (
      <div className="report-content" style={{
-      padding: '32px',
+      padding: isMobile ? '16px' : '32px',
       background: '#f5f7fa',
       minHeight: '100vh',
       fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif"
@@ -992,91 +1004,94 @@ useEffect(() => {
       {/* Header */}
       <div style={{
         background: '#ffffff',
-        padding: '24px 32px',
+        padding: isMobile ? '20px' : '24px 32px',
         borderRadius: '16px',
         marginBottom: '32px',
         border: '1px solid rgba(0,0,0,0.02)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.02)',
         display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
         justifyContent: 'space-between',
-        alignItems: 'flex-start',
-        flexDirection: 'row'
+        alignItems: isMobile ? 'stretch' : 'flex-start',
+        gap: isMobile ? '16px' : '0'
       }} dir="ltr">
-        <div style={{ display: 'flex', gap: '12px' }}>
-         
-          <button
-            onClick={() => navigate(-1)}
-            style={{
-              padding: '10px 20px',
-              background: 'white',
-              color: '#475569',
-              border: '1px solid #e2e8f0',
-              borderRadius: '30px',
-              fontSize: '14px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
-            onMouseLeave={(e) => e.target.style.background = 'white'}
-          >
-            ← رجوع
-          </button>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: isMobile ? 'flex-start' : 'flex-start' }}>
+        <div style={{ display: 'flex', gap: '12px', justifyContent: isMobile ? 'flex-flex-start' : 'flex-start' }}>
+  <button
+    onClick={() => navigate(-1)}
+    style={{
+      padding: isMobile ? '8px 16px' : '10px 20px',
+      background: 'white',
+      color: '#475569',
+      border: '1px solid #e2e8f0',
+      borderRadius: '30px',
+      fontSize: isMobile ? '13px' : '14px',
+      cursor: 'pointer',
+      transition: 'all 0.2s ease'
+    }}
+    onMouseEnter={(e) => e.target.style.background = '#f8fafc'}
+    onMouseLeave={(e) => e.target.style.background = 'white'}
+  >
+    ← رجوع
+  </button>
+</div>
         </div>
 
         <div style={{ flex: 1, textAlign: 'right' }} dir="rtl">
-          <h1 style={{ fontSize: '24px', color: '#1a2634', marginBottom: '16px', fontWeight: '600' }}>
+          <h1 style={{ fontSize: isMobile ? '20px' : '24px', color: '#1a2634', marginBottom: '16px', fontWeight: '600' }}>
             تقرير المشروع - {project.report_number}
           </h1>
           
+          {/* معلومات المشروع - متجاوبة مع الجوال */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-            gap: '16px',
+            gridTemplateColumns: isMobile ? '1fr 1fr' : 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: isMobile ? '12px' : '16px',
             background: '#f8fafc',
-            padding: '16px',
+            padding: isMobile ? '12px' : '16px',
             borderRadius: '12px',
             marginTop: '8px'
           }}>
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>المالك</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>{project.owner_name}</span>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>المالك</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>{project.owner_name}</span>
             </div>
             
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>الشركة</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>{project.company_name}</span>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>الشركة</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>{project.company_name}</span>
             </div>
             
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>الموقع</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>{project.location}</span>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>الموقع</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>{project.location}</span>
             </div>
             
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>المهندس المسؤول</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>{project.engineer_name}</span>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>المهندس</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>{project.engineer_name}</span>
             </div>
             
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>تاريخ التقرير</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>التاريخ</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>
                 {new Date(project.report_date).toLocaleDateString('en-US')}
               </span>
             </div>
             
             <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>عدد العمال</span>
-              <span style={{ color: '#1a2634', fontSize: '16px', fontWeight: '500' }}>{project.workers_count}</span>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>عدد العمال</span>
+              <span style={{ color: '#1a2634', fontSize: isMobile ? '13px' : '16px', fontWeight: '500' }}>{project.workers_count}</span>
             </div>
             
-            <div>
-              <span style={{ color: '#64748b', fontSize: '12px', display: 'block', marginBottom: '4px' }}>حالة التقرير</span>
+            <div style={isMobile ? { gridColumn: 'span 2' } : {}}>
+              <span style={{ color: '#64748b', fontSize: isMobile ? '11px' : '12px', display: 'block', marginBottom: '4px' }}>الحالة</span>
               <span style={{
                 color: project.status === 'completed' ? '#059669' : '#f59e0b',
-                fontSize: '14px',
+                fontSize: isMobile ? '12px' : '14px',
                 fontWeight: '600',
                 background: project.status === 'completed' ? '#d1fae5' : '#fef3c7',
-                padding: '4px 12px',
+                padding: isMobile ? '3px 10px' : '4px 12px',
                 borderRadius: '30px',
                 display: 'inline-block'
               }}>
@@ -1089,13 +1104,13 @@ useEffect(() => {
 
       {isReportLocked ? (
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderRadius: '12px',
           marginBottom: '24px',
           backgroundColor: '#fee2e2',
           border: '1px solid #fecaca',
           color: '#991b1b',
-          fontSize: '15px',
+          fontSize: isMobile ? '14px' : '15px',
           fontWeight: '500',
           textAlign: 'center'
         }}>
@@ -1103,28 +1118,28 @@ useEffect(() => {
         </div>
       ) : timeRemaining && (
         <div style={{
-          padding: '12px 24px',
+          padding: isMobile ? '12px 16px' : '12px 24px',
           borderRadius: '12px',
           marginBottom: '24px',
           backgroundColor: '#fef3c7',
           border: '1px solid #fde68a',
           color: '#92400e',
-          fontSize: '14px',
+          fontSize: isMobile ? '13px' : '14px',
           textAlign: 'center'
         }}>
-          ⏳ الوقت المتبقي للتعديل: {timeRemaining}
+           الوقت المتبقي للتعديل: {timeRemaining}
         </div>
       )}
 
       {submitMessage.text && (
         <div style={{
-          padding: '16px 24px',
+          padding: isMobile ? '14px 16px' : '16px 24px',
           borderRadius: '12px',
           marginBottom: '24px',
           backgroundColor: submitMessage.type === 'success' ? '#f0fdf4' : '#fef2f2',
           border: `1px solid ${submitMessage.type === 'success' ? '#86efac' : '#fecaca'}`,
           color: submitMessage.type === 'success' ? '#166534' : '#991b1b',
-          fontSize: '15px',
+          fontSize: isMobile ? '14px' : '15px',
           fontWeight: '500',
           textAlign: 'center'
         }}>
@@ -1134,7 +1149,7 @@ useEffect(() => {
 
       <div style={{
         background: '#ffffff',
-        padding: '32px',
+        padding: isMobile ? '16px' : '32px',
         borderRadius: '16px',
         border: '1px solid rgba(0,0,0,0.02)',
         boxShadow: '0 4px 12px rgba(0,0,0,0.02)'
@@ -1151,7 +1166,7 @@ useEffect(() => {
     flexDirection: 'row-reverse'
   }}>
     <h3 style={{
-      fontSize: '20px',
+      fontSize: isMobile ? '18px' : '20px',
       fontWeight: '600',
       margin: 0,
       textAlign: 'right',
@@ -1164,440 +1179,491 @@ useEffect(() => {
     </h3>
   </div>
   
-  <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
-      <thead>
-        <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '8%' }}>#</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '23%' }}>رقم البند</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '23%' }}>منطقة العمل</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '15%' }}>عدد العمال</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '15%' }}>الكمية</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '16%' }}>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        {workItems.map((item, index) => (
-          <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-            {editingWorkItem === item.id ? (
-              <>
-                <td style={{ padding: '12px', textAlign: 'center', verticalAlign: 'middle' }}>{index + 1}</td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editWorkItemData.item_name}
-                    onChange={(e) => setEditWorkItemData({...editWorkItemData, item_name: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editWorkItemData.work_area}
-                    onChange={(e) => setEditWorkItemData({...editWorkItemData, work_area: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="number"
-                    value={editWorkItemData.workers_count}
-                    onChange={(e) => setEditWorkItemData({...editWorkItemData, workers_count: parseInt(e.target.value) || 0})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="number"
-                    value={editWorkItemData.quantity}
-                    onChange={(e) => setEditWorkItemData({...editWorkItemData, quantity: parseInt(e.target.value) || 0})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                    <button
-                      onClick={() => handleUpdateWorkItem(item.id)}
+  {!isMobile ? (
+    /* للديسكتوب - كما هو */
+    <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl' }}>
+        <thead>
+          <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '8%' }}>#</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '23%' }}>رقم البند</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '23%' }}>منطقة العمل</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '15%' }}>عدد العمال</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '15%' }}>الكمية</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '16%' }}>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {workItems.map((item, index) => (
+            <tr key={item.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+              {editingWorkItem === item.id ? (
+                <>
+                  <td style={{ padding: '12px', textAlign: 'center', verticalAlign: 'middle' }}>{index + 1}</td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editWorkItemData.item_name}
+                      onChange={(e) => setEditWorkItemData({...editWorkItemData, item_name: e.target.value})}
                       style={{
-                        padding: '6px 12px',
-                        background: '#10b981',
-                        color: 'white',
-                        border: 'none',
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        //textAlign: 'center',
                         transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 4px rgba(16,185,129,0.2)'
+                        outline: 'none',
+                        textAlign: 'right',
+                        boxSizing: 'border-box'
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#059669';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#10b981';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
                       }}
-                    >
-                      حفظ
-                    </button>
-                    <button
-                      onClick={() => setEditingWorkItem(null)}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editWorkItemData.work_area}
+                      onChange={(e) => setEditWorkItemData({...editWorkItemData, work_area: e.target.value})}
                       style={{
-                        padding: '6px 12px',
-                        background: '#6b7280',
-                        color: 'white',
-                        border: 'none',
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #e2e8f0',
                         borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
                         transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 4px rgba(107,114,128,0.2)'
+                        outline: 'none',
+                        boxSizing: 'border-box'
                       }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#4b5563';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
                       }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#6b7280';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
                       }}
-                    >
-                      إلغاء
-                    </button>
-                  </div>
-                </td>
-              </>
-            ) : (
-              <>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#64748b', verticalAlign: 'middle' }}>{index + 1}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634', verticalAlign: 'middle' }}>{item.item_name}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.work_area}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.workers_count}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.quantity}</td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  {!viewOnly && canEdit ? (
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="number"
+                      value={editWorkItemData.workers_count}
+                      onChange={(e) => setEditWorkItemData({...editWorkItemData, workers_count: parseInt(e.target.value) || 0})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="number"
+                      value={editWorkItemData.quantity}
+                      onChange={(e) => setEditWorkItemData({...editWorkItemData, quantity: parseInt(e.target.value) || 0})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 12px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
                     <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
                       <button
-                        onClick={() => handleEditWorkItem(item)}
-                        disabled={!canEdit}
+                        onClick={() => handleUpdateWorkItem(item.id)}
                         style={{
                           padding: '6px 12px',
-                          background: !canEdit ? '#e2e8f0' : '#f97316',
+                          background: '#10b981',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
                           fontSize: '12px',
                           fontWeight: '500',
-                          cursor: !canEdit ? 'not-allowed' : 'pointer',
-                          opacity: !canEdit ? 0.5 : 1,
+                          cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)'
+                          boxShadow: '0 2px 4px rgba(16,185,129,0.2)'
                         }}
                         onMouseEnter={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#ea580c';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
-                          }
+                          e.currentTarget.style.background = '#059669';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
                         }}
                         onMouseLeave={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#f97316';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
-                          }
+                          e.currentTarget.style.background = '#10b981';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
                         }}
                       >
-                        تعديل
+                        حفظ
                       </button>
                       <button
-                        onClick={() => handleDeleteWorkItem(item.id)}
-                        disabled={!canEdit}
+                        onClick={() => setEditingWorkItem(null)}
                         style={{
                           padding: '6px 12px',
-                          background: !canEdit ? '#e2e8f0' : '#ef4444',
+                          background: '#6b7280',
                           color: 'white',
                           border: 'none',
                           borderRadius: '6px',
                           fontSize: '12px',
                           fontWeight: '500',
-                          cursor: !canEdit ? 'not-allowed' : 'pointer',
-                          opacity: !canEdit ? 0.5 : 1,
+                          cursor: 'pointer',
                           transition: 'all 0.2s ease',
-                          boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
+                          boxShadow: '0 2px 4px rgba(107,114,128,0.2)'
                         }}
                         onMouseEnter={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#dc2626';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
-                          }
+                          e.currentTarget.style.background = '#4b5563';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
                         }}
                         onMouseLeave={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#ef4444';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
-                          }
+                          e.currentTarget.style.background = '#6b7280';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
                         }}
                       >
-                        حذف
+                        إلغاء
                       </button>
                     </div>
-                  ) : (
-                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
-                  )}
-                </td>
-              </>
-            )}
-          </tr>
-        ))}
-        {workItems.length === 0 && (
-          <tr>
-            <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-              لا توجد أعمال جارية مضافة
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#64748b', verticalAlign: 'middle' }}>{index + 1}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634', verticalAlign: 'middle' }}>{item.item_name}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.work_area}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.workers_count}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{item.quantity}</td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    {!viewOnly && canEdit ? (
+                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                        <button
+                          onClick={() => handleEditWorkItem(item)}
+                          disabled={!canEdit}
+                          style={{
+                            padding: '6px 12px',
+                            background: !canEdit ? '#e2e8f0' : '#f97316',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: !canEdit ? 'not-allowed' : 'pointer',
+                            opacity: !canEdit ? 0.5 : 1,
+                            transition: 'all 0.2s ease',
+                            boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#ea580c';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#f97316';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
+                            }
+                          }}
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => handleDeleteWorkItem(item.id)}
+                          disabled={!canEdit}
+                          style={{
+                            padding: '6px 12px',
+                            background: !canEdit ? '#e2e8f0' : '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: !canEdit ? 'not-allowed' : 'pointer',
+                            opacity: !canEdit ? 0.5 : 1,
+                            transition: 'all 0.2s ease',
+                            boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#dc2626';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#ef4444';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
+                            }
+                          }}
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
+                    )}
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+          {workItems.length === 0 && (
+            <tr>
+              <td colSpan="6" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                لا توجد أعمال جارية مضافة
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    /* للجوال - كروت */
+    <div style={{ marginBottom: '20px' }}>
+      {workItems.map((item, index) => (
+        <div
+          key={item.id}
+          style={{
+            padding: '16px',
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #edf2f7',
+            marginBottom: '12px',
+            textAlign: 'right',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+          }}
+        >
+          {editingWorkItem === item.id ? (
+            /* وضع التعديل */
+            <div>
+              <input
+                type="text"
+                value={editWorkItemData.item_name}
+                onChange={(e) => setEditWorkItemData({...editWorkItemData, item_name: e.target.value})}
+                placeholder="رقم البند"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editWorkItemData.work_area}
+                onChange={(e) => setEditWorkItemData({...editWorkItemData, work_area: e.target.value})}
+                placeholder="منطقة العمل"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="number"
+                value={editWorkItemData.workers_count}
+                onChange={(e) => setEditWorkItemData({...editWorkItemData, workers_count: parseInt(e.target.value) || 0})}
+                placeholder="عدد العمال"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="number"
+                value={editWorkItemData.quantity}
+                onChange={(e) => setEditWorkItemData({...editWorkItemData, quantity: parseInt(e.target.value) || 0})}
+                placeholder="الكمية"
+                style={{ width: '100%', padding: '8px', marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => handleUpdateWorkItem(item.id)}
+                  style={{ flex: 1, padding: '10px', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px' }}
+                >
+                  حفظ
+                </button>
+                <button
+                  onClick={() => setEditingWorkItem(null)}
+                  style={{ flex: 1, padding: '10px', background: '#6b7280', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px' }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* وضع العرض */
+            <div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>رقم البند</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{item.item_name}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>منطقة العمل</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{item.work_area}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>عدد العمال</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{item.workers_count}</span>
+              </div>
+              <div style={{ marginBottom: '12px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>الكمية</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{item.quantity}</span>
+              </div>
+              {!viewOnly && canEdit && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleEditWorkItem(item)}
+                    disabled={!canEdit}
+                    style={{ flex: 1, padding: '10px', background: '#f97316', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px' }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    onClick={() => handleDeleteWorkItem(item.id)}
+                    disabled={!canEdit}
+                    style={{ flex: 1, padding: '10px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px', fontSize: '13px' }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
 
   {!viewOnly && canEdit && (
     <form onSubmit={handleAddWorkItem} style={{ 
       display: 'flex', 
-      gap: '12px', 
+      gap: isMobile ? '12px' : '12px', 
       alignItems: 'center',
       width: '100%',
-      flexDirection: 'row',
+      flexDirection: isMobile ? 'column' : 'row',
       marginTop: '24px',
-      padding: '16px',
+      padding: isMobile ? '16px' : '16px',
       background: '#f8fafc',
       borderRadius: '12px'
     }} dir="rtl">
-      {/* عنصر فارغ لموازنة عمود # (8%) */}
-      <div style={{ width: '8%' }}></div>
       
-      {/* رقم البند - 23% */}
+      {!isMobile && <div style={{ width: '8%' }}></div>}
+      
       <input
         type="text"
         value={newWorkItem.item_name}
         onChange={(e) => setNewWorkItem({ ...newWorkItem, item_name: e.target.value })}
         placeholder="رقم البند"
         style={{
-          width: '23%',
-          padding: '10px 12px',
+          width: isMobile ? '100%' : '23%',
+          padding: isMobile ? '12px' : '10px 12px',
           border: '1px solid #e2e8f0',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           backgroundColor: '#ffffff',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = '#2d3e50';
-          e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = 'none';
+          textAlign: 'center'
         }}
         required
       />
       
-      {/* منطقة العمل - 23% */}
       <input
         type="text"
         value={newWorkItem.work_area}
         onChange={(e) => setNewWorkItem({ ...newWorkItem, work_area: e.target.value })}
         placeholder="منطقة العمل"
         style={{
-          width: '23%',
-          padding: '10px 12px',
+          width: isMobile ? '100%' : '23%',
+          padding: isMobile ? '12px' : '10px 12px',
           border: '1px solid #e2e8f0',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           backgroundColor: '#ffffff',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = '#2d3e50';
-          e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = 'none';
+          textAlign: 'center'
         }}
         required
       />
       
-      {/* عدد العمال - 15% */}
       <input
         type="number"
         value={newWorkItem.workers_count}
         onChange={(e) => setNewWorkItem({ ...newWorkItem, workers_count: parseInt(e.target.value) || 0 })}
         placeholder="عدد العمال"
         style={{
-          width: '15%',
-          padding: '10px 12px',
+          width: isMobile ? '100%' : '15%',
+          padding: isMobile ? '12px' : '10px 12px',
           border: '1px solid #e2e8f0',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           backgroundColor: '#ffffff',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = '#2d3e50';
-          e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = 'none';
+          textAlign: 'center'
         }}
       />
       
-      {/* الكمية - 15% */}
       <input
         type="number"
         value={newWorkItem.quantity}
         onChange={(e) => setNewWorkItem({ ...newWorkItem, quantity: parseInt(e.target.value) || 0 })}
         placeholder="الكمية"
         style={{
-          width: '15%',
-          padding: '10px 12px',
+          width: isMobile ? '100%' : '15%',
+          padding: isMobile ? '12px' : '10px 12px',
           border: '1px solid #e2e8f0',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           backgroundColor: '#ffffff',
-          textAlign: 'center',
-          transition: 'all 0.2s ease',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = '#2d3e50';
-          e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = 'none';
+          textAlign: 'center'
         }}
       />
       
-      {/* زر الإضافة - 16% */}
       <button
         type="submit"
         style={{
-          width: '16%',
-          padding: '10px 24px',
+          width: isMobile ? '100%' : '16%',
+          padding: isMobile ? '12px' : '10px 24px',
           background: '#2d3e50',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           fontWeight: '600',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 4px 6px rgba(45,62,80,0.2)'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = '#1a2634';
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '0 6px 12px rgba(45,62,80,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = '#2d3e50';
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '0 4px 6px rgba(45,62,80,0.2)';
+          cursor: 'pointer'
         }}
       >
-        + إضافة
+        إضافة
       </button>
     </form>
   )}
@@ -1627,1133 +1693,21 @@ useEffect(() => {
     </h3>
   </div>
   
-  <div style={{ marginBottom: '20px' }}>
-    {nextDayPlans.map((plan) => (
-      <div
-        key={plan.id}
-        style={{
-          padding: '16px 20px',
-          background: '#ffffff',
-          borderRadius: '12px',
-          border: '1px solid #edf2f7',
-          marginBottom: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'}
-      >
-        {editingPlan === plan.id && !viewOnly && canEdit ? (
-          <>
-            {/* الأزرار على اليسار - في وضع التعديل */}
-            <div style={{ display: 'flex', gap: '8px' }}>
-              <button
-                onClick={() => handleUpdatePlan(plan.id)}
-                style={{
-                  padding: '8px 20px',
-                  background: '#10b981',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(16,185,129,0.2)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#059669';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#10b981';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
-                }}
-              >
-                حفظ
-              </button>
-              <button
-                onClick={() => setEditingPlan(null)}
-                style={{
-                  padding: '8px 20px',
-                  background: '#6b7280',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(107,114,128,0.2)'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = '#4b5563';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = '#6b7280';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
-                }}
-              >
-                إلغاء
-              </button>
-            </div>
-
-            {/* حقل الإدخال */}
-            <input
-              type="text"
-              value={editPlanData}
-              onChange={(e) => setEditPlanData(e.target.value)}
-              style={{
-                flex: 1,
-                marginRight: '16px',
-                padding: '10px 14px',
-                border: '1px solid #e2e8f0',
-                borderRadius: '8px',
-                fontSize: '14px',
-                backgroundColor: '#ffffff',
-                textAlign: 'right',
-                transition: 'all 0.2s ease',
-                outline: 'none'
-              }}
-              onFocus={(e) => {
-                e.target.style.borderColor = '#f97316';
-                e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-              }}
-              onBlur={(e) => {
-                e.target.style.borderColor = '#e2e8f0';
-                e.target.style.boxShadow = 'none';
-              }}
-            />
-          </>
-        ) : (
-          <>
-            {/* الأزرار على اليسار - في وضع العرض */}
-            {!viewOnly && canEdit ? (
-              <div style={{ display: 'flex', gap: '8px' }}>
-                <button
-                  onClick={() => handleEditPlan(plan)}
-                  disabled={!canEdit}
-                  style={{
-                    padding: '8px 20px',
-                    background: !canEdit ? '#e2e8f0' : '#f97316',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: !canEdit ? 'not-allowed' : 'pointer',
-                    opacity: !canEdit ? 0.5 : 1,
-                    transition: 'all 0.2s ease',
-                    boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (canEdit) {
-                      e.currentTarget.style.background = '#ea580c';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (canEdit) {
-                      e.currentTarget.style.background = '#f97316';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
-                    }
-                  }}
-                >
-                  تعديل
-                </button>
-                <button
-                  onClick={() => handleDeletePlan(plan.id)}
-                  disabled={!canEdit}
-                  style={{
-                    padding: '8px 20px',
-                    background: !canEdit ? '#e2e8f0' : '#ef4444',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontSize: '13px',
-                    fontWeight: '500',
-                    cursor: !canEdit ? 'not-allowed' : 'pointer',
-                    opacity: !canEdit ? 0.5 : 1,
-                    transition: 'all 0.2s ease',
-                    boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (canEdit) {
-                      e.currentTarget.style.background = '#dc2626';
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    if (canEdit) {
-                      e.currentTarget.style.background = '#ef4444';
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
-                    }
-                  }}
-                >
-                  حذف
-                </button>
-              </div>
-            ) : (
-              <div style={{ width: '110px' }}></div> // عنصر فارغ للمحاذاة في وضع العرض
-            )}
-
-            {/* نص الخطة */}
-            <p
-              style={{
-                flex: 1,
-                margin: 0,
-                marginRight: '16px',
-                color: '#1a2634',
-                fontSize: '14px',
-                textAlign: 'right',
-                lineHeight: '1.6'
-              }}
-            >
-              {plan.description}
-            </p>
-          </>
-        )}
-      </div>
-    ))}
-
-    {nextDayPlans.length === 0 && (
-      <div
-        style={{
-          padding: '40px',
-          textAlign: 'center',
-          color: '#94a3b8',
-          background: '#f8fafc',
-          borderRadius: '12px',
-          border: '1px dashed #cbd5e1'
-        }}
-      >
-        لا توجد خطط مضافة
-      </div>
-    )}
-  </div>
-
-  {!viewOnly && canEdit && (
-    <form onSubmit={handleAddPlan} style={{ 
-      display: 'flex', 
-      gap: '12px', 
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginTop: '24px',
-      padding: '16px',
-      background: '#f8fafc',
-      borderRadius: '12px'
-    }} dir="ltr">
-      {/* زر الإضافة على اليسار */}
-      <button
-        type="submit"
-        style={{
-          padding: '12px 28px',
-          background: '#2d3e50',
-          color: 'white',
-          border: 'none',
-          borderRadius: '8px',
-          fontSize: '14px',
-          fontWeight: '600',
-          cursor: 'pointer',
-          minWidth: '110px',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 4px 6px rgba(45,62,80,0.2)'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = '#1a2634';
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '0 6px 12px rgba(45,62,80,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = '#2d3e50';
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '0 4px 6px rgba(45,62,80,0.2)';
-        }}
-      >
-        + إضافة
-      </button>
-      
-      {/* حقل الإدخال */}
-      <input
-        type="text"
-        value={newPlan.description}
-        onChange={(e) => setNewPlan({ description: e.target.value })}
-        placeholder="أضف خطة جديدة"
-        style={{
-          flex: 1,
-          padding: '12px 16px',
-          border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          fontSize: '14px',
-          backgroundColor: '#ffffff',
-          textAlign: 'center',
-          textIndent: '-120px',
-          transition: 'all 0.2s ease',
-          outline: 'none'
-        }}
-        onFocus={(e) => {
-          e.target.style.borderColor = '#2d3e50';
-          e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-        }}
-        onBlur={(e) => {
-          e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = 'none';
-        }}
-        required
-      />
-    </form>
-  )}
-</div>
-
- )}
-
-      {/* 3️⃣ المواد */}
-  {(dailyReportId || reportId) && (
-<div style={{ marginBottom: '48px' }}>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '20px',
-    flexDirection: 'row-reverse'
-  }}>
-    <h3 style={{
-      fontSize: '20px',
-      fontWeight: '600',
-      margin: 0,
-      textAlign: 'right',
-      flex: 1,
-      borderBottom: '2px solid #2d3e50',
-      paddingBottom: '12px',
-      color: '#1a2634'
-    }}>
-      المواد
-    </h3>
-  </div>
-  
-  <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
-    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl', tableLayout: 'fixed' }}>
-      <thead>
-        <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>اسم الخامة</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>النوع</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '8%' }}>الكمية</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>مكان التخزين</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>المورد</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>رقم المورد</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>مكان التوريد</th>
-          <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>الإجراءات</th>
-        </tr>
-      </thead>
-      <tbody>
-        {materials.map(material => (
-          <tr key={material.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-            {editingMaterial === material.id && !viewOnly && canEdit ? (
-              <>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.material_name}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, material_name: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.material_type}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, material_type: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="number"
-                    value={editMaterialData.quantity}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, quantity: parseInt(e.target.value) || 0})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.storage_location}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, storage_location: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.supplier_name}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, supplier_name: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.supplier_contact}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, supplier_contact: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <input
-                    type="text"
-                    value={editMaterialData.supply_location}
-                    onChange={(e) => setEditMaterialData({...editMaterialData, supply_location: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '8px 8px',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '6px',
-                      fontSize: '13px',
-                      backgroundColor: '#ffffff',
-                      textAlign: 'center',
-                      transition: 'all 0.2s ease',
-                      outline: 'none',
-                      boxSizing: 'border-box'
-                    }}
-                    onFocus={(e) => {
-                      e.target.style.borderColor = '#f97316';
-                      e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
-                    }}
-                    onBlur={(e) => {
-                      e.target.style.borderColor = '#e2e8f0';
-                      e.target.style.boxShadow = 'none';
-                    }}
-                  />
-                </td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                    <button
-                      onClick={() => handleUpdateMaterial(material.id)}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#10b981',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 4px rgba(16,185,129,0.2)',
-                        minWidth: '60px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#059669';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#10b981';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
-                      }}
-                    >
-                      حفظ
-                    </button>
-                    <button
-                      onClick={() => setEditingMaterial(null)}
-                      style={{
-                        padding: '6px 12px',
-                        background: '#6b7280',
-                        color: 'white',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        boxShadow: '0 2px 4px rgba(107,114,128,0.2)',
-                        minWidth: '60px'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.background = '#4b5563';
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.background = '#6b7280';
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
-                      }}
-                    >
-                      إلغاء
-                    </button>
-                  </div>
-                </td>
-              </>
-            ) : (
-              <>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634', verticalAlign: 'middle' }}>{material.material_name}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.material_type || '-'}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.quantity}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.storage_location || '-'}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supplier_name || '-'}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supplier_contact || '-'}</td>
-                <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supply_location || '-'}</td>
-                <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
-                  {!viewOnly && canEdit ? (
-                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                      <button
-                        onClick={() => handleEditMaterial(material)}
-                        disabled={!canEdit}
-                        style={{
-                          padding: '6px 12px',
-                          background: !canEdit ? '#e2e8f0' : '#f97316',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          cursor: !canEdit ? 'not-allowed' : 'pointer',
-                          opacity: !canEdit ? 0.5 : 1,
-                          transition: 'all 0.2s ease',
-                          boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)',
-                          minWidth: '60px'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#ea580c';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#f97316';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
-                          }
-                        }}
-                      >
-                        تعديل
-                      </button>
-                      <button
-                        onClick={() => handleDeleteMaterial(material.id)}
-                        disabled={!canEdit}
-                        style={{
-                          padding: '6px 12px',
-                          background: !canEdit ? '#e2e8f0' : '#ef4444',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          cursor: !canEdit ? 'not-allowed' : 'pointer',
-                          opacity: !canEdit ? 0.5 : 1,
-                          transition: 'all 0.2s ease',
-                          boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)',
-                          minWidth: '60px'
-                        }}
-                        onMouseEnter={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#dc2626';
-                            e.currentTarget.style.transform = 'translateY(-1px)';
-                            e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
-                          }
-                        }}
-                        onMouseLeave={(e) => {
-                          if (canEdit) {
-                            e.currentTarget.style.background = '#ef4444';
-                            e.currentTarget.style.transform = 'translateY(0)';
-                            e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
-                          }
-                        }}
-                      >
-                        حذف
-                      </button>
-                    </div>
-                  ) : (
-                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
-                  )}
-                </td>
-              </>
-            )}
-          </tr>
-        ))}
-        {materials.length === 0 && (
-          <tr>
-            <td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
-              لا توجد مواد مضافة
-            </td>
-          </tr>
-        )}
-      </tbody>
-    </table>
-  </div>
-
-  {!viewOnly && canEdit && (
-    <div style={{ 
-      overflowX: 'auto', 
-      marginTop: '24px',
-      padding: '16px',
-      background: '#f8fafc',
-      borderRadius: '12px'
-    }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl', tableLayout: 'fixed' }}>
-        <tbody>
-          <tr>
-            <td style={{ width: '12%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="اسم الخامة *"
-                value={newMaterial.material_name}
-                onChange={(e) => setNewMaterial({ ...newMaterial, material_name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-                required
-              />
-            </td>
-            <td style={{ width: '10%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="النوع"
-                value={newMaterial.material_type}
-                onChange={(e) => setNewMaterial({ ...newMaterial, material_type: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '8%', padding: '4px' }}>
-              <input
-                type="number"
-                value={newMaterial.quantity}
-                onChange={(e) => setNewMaterial({ ...newMaterial, quantity: parseInt(e.target.value) || 0 })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '12%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="مكان التخزين"
-                value={newMaterial.storage_location}
-                onChange={(e) => setNewMaterial({ ...newMaterial, storage_location: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '12%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="المورد"
-                value={newMaterial.supplier_name}
-                onChange={(e) => setNewMaterial({ ...newMaterial, supplier_name: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '10%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="رقم المورد"
-                value={newMaterial.supplier_contact}
-                onChange={(e) => setNewMaterial({ ...newMaterial, supplier_contact: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '12%', padding: '4px' }}>
-              <input
-                type="text"
-                placeholder="مكان التوريد"
-                value={newMaterial.supply_location}
-                onChange={(e) => setNewMaterial({ ...newMaterial, supply_location: e.target.value })}
-                style={{
-                  width: '100%',
-                  padding: '10px 8px',
-                  border: '1px solid #e2e8f0',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  backgroundColor: '#ffffff',
-                  textAlign: 'center',
-                  transition: 'all 0.2s ease',
-                  outline: 'none',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#2d3e50';
-                  e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#e2e8f0';
-                  e.target.style.boxShadow = 'none';
-                }}
-              />
-            </td>
-            <td style={{ width: '12%', padding: '4px', textAlign: 'center' }}>
-              <button
-                onClick={handleAddMaterial}
-                style={{
-                  width: '100%',
-                  padding: '10px 0',
-                  background: '#2d3e50',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '13px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  boxShadow: '0 2px 4px rgba(45,62,80,0.2)'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#1a2634';
-                  e.target.style.transform = 'translateY(-1px)';
-                  e.target.style.boxShadow = '0 4px 8px rgba(45,62,80,0.3)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = '#2d3e50';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 2px 4px rgba(45,62,80,0.2)';
-                }}
-              >
-                + إضافة
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  )}
-</div>
-  )}
-      {/* 4️⃣ صور الموقع */}
-      {(dailyReportId || reportId) && (
-<div style={{ marginBottom: '48px' }}>
-  <div style={{
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    marginBottom: '20px',
-    flexDirection: 'row-reverse'
-  }}>
-    <h3 style={{
-      fontSize: '20px',
-      fontWeight: '600',
-      margin: 0,
-      textAlign: 'right',
-      flex: 1,
-      borderBottom: '2px solid #2d3e50',
-      paddingBottom: '12px',
-      color: '#1a2634'
-    }}>
-      صور الموقع
-    </h3>
-  </div>
-  
-  {!viewOnly && canEdit && (
-    <div style={{ marginBottom: '24px' }}>
-      <div
-        style={{
-          border: '2px dashed #cbd5e1',
-          borderRadius: '16px',
-          padding: '30px',
-          textAlign: 'center',
-          background: '#f8fafc',
-          cursor: 'pointer',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#2d3e50'}
-        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
-        onClick={() => document.getElementById('imageUpload').click()}
-      >
-        <input
-          id="imageUpload"
-          type="file"
-          accept="image/*"
-          onChange={handleImageUpload}
-          style={{ display: 'none' }}
-        />
-        <div style={{ fontSize: '32px', marginBottom: '8px' }}>📸</div>
-        <p style={{ color: '#475569', fontSize: '14px', fontWeight: '500', marginBottom: '4px' }}>
-          {uploading ? 'جاري الرفع...' : 'اضغط لرفع صورة'}
-        </p>
-        <p style={{ color: '#94a3b8', fontSize: '12px' }}>
-          PNG, JPG, GIF
-        </p>
-      </div>
-    </div>
-  )}
-
-  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '20px' }}>
-    {siteImages.map(image => (
-      <div
-        key={image.id}
-        style={{
-          background: '#ffffff',
-          borderRadius: '12px',
-          overflow: 'hidden',
-          border: '1px solid #edf2f7',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-          transition: 'all 0.2s ease'
-        }}
-        onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}
-        onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'}
-      >
-        <img
-          src={`http://localhost:3000/${image.image_path}`}
-          alt="Site"
-          style={{
-            width: '100%',
-            height: '140px',
-            objectFit: 'cover',
-            cursor: 'pointer',
-            transition: 'transform 0.2s ease'
-          }}
-          onClick={() => window.open(`http://localhost:3000/${image.image_path}`, '_blank')}
-          onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
-          onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
-        />
-        <div style={{ 
-          padding: '12px', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          borderTop: '1px solid #f1f5f9'
-        }}>
-          <span style={{ fontSize: '11px', color: '#64748b' }}>
-            {new Date(image.uploaded_at).toLocaleDateString('en-US')}
-          </span>
-          
-          {!viewOnly && canEdit ? (
-            <button
-              onClick={() => handleDeleteImage(image.id)}
-              disabled={!canEdit}
-              style={{
-                padding: '6px 16px',
-                background: !canEdit ? '#e2e8f0' : '#ef4444',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '12px',
-                fontWeight: '500',
-                cursor: !canEdit ? 'not-allowed' : 'pointer',
-                opacity: !canEdit ? 0.5 : 1,
-                transition: 'all 0.2s ease',
-                boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
-              }}
-              onMouseEnter={(e) => {
-                if (canEdit) {
-                  e.currentTarget.style.background = '#dc2626';
-                  e.currentTarget.style.transform = 'translateY(-1px)';
-                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (canEdit) {
-                  e.currentTarget.style.background = '#ef4444';
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
-                }
-              }}
-            >
-              حذف
-            </button>
-          ) : (
-            <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
-          )}
-        </div>
-      </div>
-    ))}
-    
-    {siteImages.length === 0 && (
-      <div style={{ 
-        gridColumn: '1/-1', 
-        textAlign: 'center', 
-        padding: '40px', 
-        color: '#94a3b8',
-        background: '#f8fafc',
-        borderRadius: '12px',
-        border: '1px dashed #cbd5e1'
-      }}>
-        لا توجد صور
-      </div>
-    )}
-  </div>
-</div>
- )}
-
-{/* 5️⃣ التوقيع */}
-{(dailyReportId || reportId) && (
-<div style={{ marginBottom: '48px' }}>
-  {/* هيدر التوقيع */}
-  <div
-    style={{
-      display: 'flex',
-      alignItems: 'center',
-      marginBottom: '20px',
-      flexDirection: 'row-reverse'
-    }}
-  >
-    <h3
-      style={{
-        fontSize: '20px',
-        fontWeight: '600',
-        margin: 0,
-        textAlign: 'right',
-        flex: 1,
-        borderBottom: '2px solid #2d3e50',
-        paddingBottom: '12px',
-        color: '#1a2634'
-      }}
-    >
-      التوقيع
-    </h3>
-  </div>
-
-  {/* قائمة التواقيع */}
-  <div style={{ marginBottom: '20px' }}>
-    {Array.isArray(signatures) &&
-      signatures.map((signature) => (
+  {/* للديسكتوب */}
+  {!isMobile && (
+    <div style={{ marginBottom: '20px' }}>
+      {nextDayPlans.map((plan) => (
         <div
-          key={signature.id}
+          key={plan.id}
           style={{
-            padding: '20px',
+            padding: '16px 20px',
             background: '#ffffff',
             borderRadius: '12px',
             border: '1px solid #edf2f7',
             marginBottom: '10px',
             display: 'flex',
             alignItems: 'center',
+            textAlign: 'right',
             justifyContent: 'space-between',
             boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
             transition: 'all 0.2s ease'
@@ -2761,14 +1715,14 @@ useEffect(() => {
           onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}
           onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'}
         >
-          {editingSignature === signature.id && !viewOnly && canEdit ? (
+          {editingPlan === plan.id && !viewOnly && canEdit ? (
             <>
-              {/* أزرار الحفظ والإلغاء في وضع التعديل */}
+              {/* الأزرار في اليسار - وضع التعديل */}
               <div style={{ display: 'flex', gap: '8px' }}>
                 <button
-                  onClick={() => handleUpdateSignature(signature.id)}
+                  onClick={() => handleUpdatePlan(plan.id)}
                   style={{
-                    padding: '6px 16px',
+                    padding: '8px 20px',
                     background: '#10b981',
                     color: 'white',
                     border: 'none',
@@ -2793,9 +1747,9 @@ useEffect(() => {
                   حفظ
                 </button>
                 <button
-                  onClick={() => setEditingSignature(null)}
+                  onClick={() => setEditingPlan(null)}
                   style={{
-                    padding: '6px 16px',
+                    padding: '8px 20px',
                     background: '#6b7280',
                     color: 'white',
                     border: 'none',
@@ -2821,11 +1775,11 @@ useEffect(() => {
                 </button>
               </div>
 
-              {/* حقل تعديل التوقيع */}
+              {/* حقل الإدخال */}
               <input
                 type="text"
-                value={editSignatureData}
-                onChange={(e) => setEditSignatureData(e.target.value)}
+                value={editPlanData}
+                onChange={(e) => setEditPlanData(e.target.value)}
                 style={{
                   flex: 1,
                   marginRight: '16px',
@@ -2850,15 +1804,14 @@ useEffect(() => {
             </>
           ) : (
             <>
-              {/* مجموعة الأزرار - تعديل وحذف (يسار) */}
+              {/* الأزرار في اليسار - وضع العرض */}
               {!viewOnly && canEdit ? (
                 <div style={{ display: 'flex', gap: '8px' }}>
-                  {/* زر التعديل - برتقالي ناعم */}
                   <button
-                    onClick={() => handleEditSignature(signature)}
+                    onClick={() => handleEditPlan(plan)}
                     disabled={!canEdit}
                     style={{
-                      padding: '6px 16px',
+                      padding: '8px 20px',
                       background: !canEdit ? '#e2e8f0' : '#f97316',
                       color: 'white',
                       border: 'none',
@@ -2887,13 +1840,11 @@ useEffect(() => {
                   >
                     تعديل
                   </button>
-
-                  {/* زر الحذف - أحمر ناعم */}
                   <button
-                    onClick={() => handleDeleteSignature(signature.id)}
+                    onClick={() => handleDeletePlan(plan.id)}
                     disabled={!canEdit}
                     style={{
-                      padding: '6px 16px',
+                      padding: '8px 20px',
                       background: !canEdit ? '#e2e8f0' : '#ef4444',
                       color: 'white',
                       border: 'none',
@@ -2924,115 +1875,1688 @@ useEffect(() => {
                   </button>
                 </div>
               ) : (
-                <div style={{ width: '90px' }}></div> // عنصر فارغ للمحافظة على المحاذاة
+                <div style={{ width: '110px' }}></div> // عنصر فارغ للمحاذاة
               )}
 
-              {/* محتوى التوقيع - في الوسط */}
-              <div
+              {/* نص الخطة في اليمين */}
+              <p
                 style={{
                   flex: 1,
-                  textAlign: 'center',
-                  margin: '0 20px'
+                  margin: 0,
+                  marginRight: '16px',
+                  color: '#1a2634',
+                  fontSize: '14px',
+                  textAlign: 'right',
+                  lineHeight: '1.6'
                 }}
               >
-                <div style={{ fontWeight: '600', marginBottom: '6px', color: '#1a2634', fontSize: '15px' }}>
-                  {signature.signed_by}
-                </div>
-                <div style={{ fontSize: '14px', color: '#4b5563', marginBottom: '4px' }}>
-                  {signature.signature_data}
-                </div>
-                <div style={{ fontSize: '11px', color: '#9ca3af' }}>
-                  {signature.signed_at &&
-                    new Date(signature.signed_at).toLocaleDateString('en-US')}
-                </div>
-              </div>
-
-              {/* عنصر فارغ للموازنة */}
-              <div style={{ width: '90px' }}></div>
+                {plan.description}
+              </p>
             </>
           )}
         </div>
       ))}
 
-    {Array.isArray(signatures) && signatures.length === 0 && (
-      <div
-        style={{
-          padding: '40px',
+      {nextDayPlans.length === 0 && (
+        <div
+          style={{
+            padding: '40px',
+            textAlign: 'center',
+            color: '#94a3b8',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px dashed #cbd5e1'
+          }}
+        >
+          لا توجد خطط مضافة
+        </div>
+      )}
+    </div>
+  )}
+
+
+   {/* للجوال - كروت */}
+  {isMobile && (
+    <div style={{ marginBottom: '20px' }}>
+      {nextDayPlans.map((plan) => (
+        <div
+          key={plan.id}
+          style={{
+            padding: '16px',
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #edf2f7',
+            marginBottom: '12px',
+            textAlign: 'right',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+          }}
+        >
+          {editingPlan === plan.id && !viewOnly && canEdit ? (
+            <div>
+              <input
+                type="text"
+                value={editPlanData}
+                onChange={(e) => setEditPlanData(e.target.value)}
+                placeholder="عدل الخطة"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  marginBottom: '12px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  textAlign: 'right'
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => handleUpdatePlan(plan.id)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px'
+                  }}
+                >
+                  حفظ
+                </button>
+                <button
+                  onClick={() => setEditingPlan(null)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    background: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px'
+                  }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+             <div style={{ marginBottom: '12px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+  <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>الخطة</span>
+  <div style={{ 
+    color: '#1a2634', 
+    fontSize: '14px', 
+    fontWeight: '500',
+    whiteSpace: 'pre-wrap',
+    wordWrap: 'break-word',
+    lineHeight: '1.6',
+    marginTop: '4px'
+  }}>
+    {plan.description}
+  </div>
+</div>
+              {!viewOnly && canEdit && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleEditPlan(plan)}
+                    disabled={!canEdit}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      background: '#f97316',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px'
+                    }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    onClick={() => handleDeletePlan(plan.id)}
+                    disabled={!canEdit}
+                    style={{
+                      flex: 1,
+                      padding: '10px',
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '13px'
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+      {nextDayPlans.length === 0 && (
+        <div style={{
+          padding: '30px',
           textAlign: 'center',
           color: '#94a3b8',
           background: '#f8fafc',
           borderRadius: '12px',
           border: '1px dashed #cbd5e1'
-        }}
-      >
-        لا يوجد توقيع
-      </div>
-    )}
-  </div>
+        }}>
+          لا توجد خطط مضافة
+        </div>
+      )}
+    </div>
+  )}
 
-  {/* قسم إضافة توقيع جديد */}
-  {!viewOnly && canEdit && (
-    <div
+ {!viewOnly && canEdit && (
+  <form onSubmit={handleAddPlan} style={{ 
+    display: 'flex', 
+    flexDirection: isMobile ? 'column' : 'row', // في الجوال: عمودي
+    gap: '12px', 
+    alignItems: isMobile ? 'stretch' : 'center',
+    marginTop: '24px',
+    padding: '16px',
+    background: '#f8fafc',
+    borderRadius: '12px',
+    width: '100%'
+  }} dir="rtl"
+  >  
+    
+    {/* حقل الإدخال - في الأعلى للجوال */}
+    <textarea
+      value={newPlan.description}
+      onChange={(e) => setNewPlan({ description: e.target.value })}
+      placeholder="أضف خطة جديدة..."
+      rows={isMobile ? 4 : 2}
       style={{
-        display: 'flex',
-        gap: '12px',
-        alignItems: 'center',
         width: '100%',
-        flexDirection: 'row',
-        marginTop: '24px',
-        padding: '16px',
-        background: '#f8fafc',
-        borderRadius: '12px'
+        padding: '14px 16px',
+        border: '1px solid #e2e8f0',
+        borderRadius: '12px',
+        fontSize: isMobile ? '15px' : '14px',
+        backgroundColor: '#ffffff',
+        textAlign: 'right',
+        transition: 'all 0.2s ease',
+        outline: 'none',
+        resize: 'vertical',
+        minHeight: isMobile ? '120px' : '60px',
+        maxHeight: '250px',
+        fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+        lineHeight: '1.6',
+        wordWrap: 'break-word',
+        whiteSpace: 'pre-wrap',
+        overflowY: 'auto',
+        boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
       }}
-      dir="ltr"
-    >
-      {/* زر الإضافة - لون كحلي */}
-      <button
-        onClick={handleAddSignature}
+      onFocus={(e) => {
+        e.target.style.borderColor = '#2d3e50';
+        e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = '#e2e8f0';
+        e.target.style.boxShadow = 'none';
+      }}
+      required
+    />
+    
+    {/* زر الإضافة - في الأسفل للجوال */}
+     <button
+        type="submit"
         style={{
-          padding: '12px 28px',
+          width: isMobile ? '100%' : '16%',
+          padding: isMobile ? '12px' : '10px 24px',
           background: '#2d3e50',
           color: 'white',
           border: 'none',
           borderRadius: '8px',
-          fontSize: '14px',
+          fontSize: isMobile ? '14px' : '14px',
           fontWeight: '600',
-          cursor: 'pointer',
-          minWidth: '130px',
-          transition: 'all 0.2s ease',
-          boxShadow: '0 4px 6px rgba(45,62,80,0.2)'
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = '#1a2634';
-          e.target.style.transform = 'translateY(-2px)';
-          e.target.style.boxShadow = '0 6px 12px rgba(45,62,80,0.3)';
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = '#2d3e50';
-          e.target.style.transform = 'translateY(0)';
-          e.target.style.boxShadow = '0 4px 6px rgba(45,62,80,0.2)';
+          cursor: 'pointer'
         }}
       >
-        + إضافة توقيع
+        إضافة
       </button>
+  </form>
+)}
+</div>
+)}
 
-      {/* حقل إدخال التوقيع */}
-      <input
-        type="text"
+      {/* 3️⃣ المواد */}
+  {(dailyReportId || reportId) && (
+<div style={{ marginBottom: '48px' }}>
+  <div style={{
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: '20px',
+    flexDirection: 'row-reverse'
+  }}>
+    <h3 style={{
+      fontSize: isMobile ? '18px' : '20px',
+      fontWeight: '600',
+      margin: 0,
+      textAlign: 'right',
+      flex: 1,
+      borderBottom: '2px solid #2d3e50',
+      paddingBottom: '12px',
+      color: '#1a2634'
+    }}>
+      المواد
+    </h3>
+  </div>
+  
+  {!isMobile ? (
+    /* للديسكتوب - كما هو */
+    <div style={{ overflowX: 'auto', marginBottom: '20px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl', tableLayout: 'fixed' }}>
+        <thead>
+          <tr style={{ background: '#f8fafc', borderBottom: '2px solid #e2e8f0' }}>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>اسم الخامة</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>النوع</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '8%' }}>الكمية</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>مكان التخزين</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>المورد</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '10%' }}>رقم المورد</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>مكان التوريد</th>
+            <th style={{ padding: '12px', textAlign: 'center', color: '#475569', fontWeight: '600', width: '12%' }}>الإجراءات</th>
+          </tr>
+        </thead>
+        <tbody>
+          {materials.map(material => (
+            <tr key={material.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
+              {editingMaterial === material.id && !viewOnly && canEdit ? (
+                <>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.material_name}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, material_name: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                         
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.material_type}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, material_type: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="number"
+                      value={editMaterialData.quantity}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, quantity: parseInt(e.target.value) || 0})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.storage_location}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, storage_location: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.supplier_name}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, supplier_name: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.supplier_contact}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, supplier_contact: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <input
+                      type="text"
+                      value={editMaterialData.supply_location}
+                      onChange={(e) => setEditMaterialData({...editMaterialData, supply_location: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '8px 8px',
+                        border: '1px solid #e2e8f0',
+                        borderRadius: '6px',
+                        fontSize: '13px',
+                        backgroundColor: '#ffffff',
+                        textAlign: 'center',
+                        transition: 'all 0.2s ease',
+                        outline: 'none',
+                        boxSizing: 'border-box'
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.borderColor = '#f97316';
+                        e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.borderColor = '#e2e8f0';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    />
+                  </td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => handleUpdateMaterial(material.id)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#10b981',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px rgba(16,185,129,0.2)',
+                          minWidth: '60px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#059669';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#10b981';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
+                        }}
+                      >
+                        حفظ
+                      </button>
+                      <button
+                        onClick={() => setEditingMaterial(null)}
+                        style={{
+                          padding: '6px 12px',
+                          background: '#6b7280',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px rgba(107,114,128,0.2)',
+                          minWidth: '60px'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = '#4b5563';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = '#6b7280';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
+                        }}
+                      >
+                        إلغاء
+                      </button>
+                    </div>
+                  </td>
+                </>
+              ) : (
+                <>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#1a2634', verticalAlign: 'middle' }}>{material.material_name}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.material_type || '-'}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.quantity}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.storage_location || '-'}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supplier_name || '-'}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supplier_contact || '-'}</td>
+                  <td style={{ padding: '12px', textAlign: 'center', color: '#475569', verticalAlign: 'middle' }}>{material.supply_location || '-'}</td>
+                  <td style={{ padding: '8px', textAlign: 'center', verticalAlign: 'middle' }}>
+                    {!viewOnly && canEdit ? (
+                      <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={() => handleEditMaterial(material)}
+                          disabled={!canEdit}
+                          style={{
+                            padding: '6px 12px',
+                            background: !canEdit ? '#e2e8f0' : '#f97316',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: !canEdit ? 'not-allowed' : 'pointer',
+                            opacity: !canEdit ? 0.5 : 1,
+                            transition: 'all 0.2s ease',
+                            boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)',
+                            minWidth: '60px'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#ea580c';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#f97316';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
+                            }
+                          }}
+                        >
+                          تعديل
+                        </button>
+                        <button
+                          onClick={() => handleDeleteMaterial(material.id)}
+                          disabled={!canEdit}
+                          style={{
+                            padding: '6px 12px',
+                            background: !canEdit ? '#e2e8f0' : '#ef4444',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '6px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            cursor: !canEdit ? 'not-allowed' : 'pointer',
+                            opacity: !canEdit ? 0.5 : 1,
+                            transition: 'all 0.2s ease',
+                            boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)',
+                            minWidth: '60px'
+                          }}
+                          onMouseEnter={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#dc2626';
+                              e.currentTarget.style.transform = 'translateY(-1px)';
+                              e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
+                            }
+                          }}
+                          onMouseLeave={(e) => {
+                            if (canEdit) {
+                              e.currentTarget.style.background = '#ef4444';
+                              e.currentTarget.style.transform = 'translateY(0)';
+                              e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
+                            }
+                          }}
+                        >
+                          حذف
+                        </button>
+                      </div>
+                    ) : (
+                      <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
+                    )}
+                  </td>
+                </>
+              )}
+            </tr>
+          ))}
+          {materials.length === 0 && (
+            <tr>
+              <td colSpan="8" style={{ padding: '40px', textAlign: 'center', color: '#94a3b8' }}>
+                لا توجد مواد مضافة
+              </td>
+            </tr>
+          )}
+        </tbody>
+      </table>
+    </div>
+  ) : (
+    /* للجوال - كروت */
+    <div style={{ marginBottom: '20px' }}>
+      {materials.map((material) => (
+        <div
+          key={material.id}
+          style={{
+            padding: '16px',
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #edf2f7',
+            marginBottom: '12px',
+             textAlign: 'right',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+          }}
+        >
+          {editingMaterial === material.id && !viewOnly && canEdit ? (
+            <div>
+              <input
+                type="text"
+                value={editMaterialData.material_name}
+                onChange={(e) => setEditMaterialData({...editMaterialData, material_name: e.target.value})}
+                placeholder="اسم الخامة"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editMaterialData.material_type}
+                onChange={(e) => setEditMaterialData({...editMaterialData, material_type: e.target.value})}
+                placeholder="النوع"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="number"
+                value={editMaterialData.quantity}
+                onChange={(e) => setEditMaterialData({...editMaterialData, quantity: parseInt(e.target.value) || 0})}
+                placeholder="الكمية"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editMaterialData.storage_location}
+                onChange={(e) => setEditMaterialData({...editMaterialData, storage_location: e.target.value})}
+                placeholder="مكان التخزين"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editMaterialData.supplier_name}
+                onChange={(e) => setEditMaterialData({...editMaterialData, supplier_name: e.target.value})}
+                placeholder="المورد"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editMaterialData.supplier_contact}
+                onChange={(e) => setEditMaterialData({...editMaterialData, supplier_contact: e.target.value})}
+                placeholder="رقم المورد"
+                style={{ width: '100%', padding: '8px', marginBottom: '8px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <input
+                type="text"
+                value={editMaterialData.supply_location}
+                onChange={(e) => setEditMaterialData({...editMaterialData, supply_location: e.target.value})}
+                placeholder="مكان التوريد"
+                style={{ width: '100%', padding: '8px', marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', textAlign: 'right' }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => handleUpdateMaterial(material.id)}
+                  style={{ flex: 1, padding: '10px', background: '#10b981', color: 'white', border: 'none', borderRadius: '6px' }}
+                >
+                  حفظ
+                </button>
+                <button
+                  onClick={() => setEditingMaterial(null)}
+                  style={{ flex: 1, padding: '10px', background: '#6b7280', color: 'white', border: 'none', borderRadius: '6px' }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>اسم الخامة</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.material_name}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>النوع</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.material_type || '-'}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>الكمية</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.quantity}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>مكان التخزين</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.storage_location || '-'}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>المورد</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.supplier_name || '-'}</span>
+              </div>
+              <div style={{ marginBottom: '8px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>رقم المورد</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.supplier_contact || '-'}</span>
+              </div>
+              <div style={{ marginBottom: '12px', padding: '8px', background: '#f8fafc', borderRadius: '6px' }}>
+                <span style={{ color: '#64748b', fontSize: '11px', display: 'block' }}>مكان التوريد</span>
+                <span style={{ color: '#1a2634', fontSize: '14px', fontWeight: '500' }}>{material.supply_location || '-'}</span>
+              </div>
+              {!viewOnly && canEdit && (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleEditMaterial(material)}
+                    disabled={!canEdit}
+                    style={{ flex: 1, padding: '10px', background: '#f97316', color: 'white', border: 'none', borderRadius: '6px' }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    onClick={() => handleDeleteMaterial(material.id)}
+                    disabled={!canEdit}
+                    style={{ flex: 1, padding: '10px', background: '#ef4444', color: 'white', border: 'none', borderRadius: '6px' }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+
+  {!viewOnly && canEdit && (
+    <div style={{ 
+      overflowX: 'auto', 
+      marginTop: '24px',
+      padding: isMobile ? '16px' : '16px',
+      background: '#f8fafc',
+      borderRadius: '12px'
+    }}>
+      {!isMobile ? (
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', direction: 'rtl', tableLayout: 'fixed' }}>
+          <tbody>
+            <tr>
+              <td style={{ width: '12%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="اسم الخامة *"
+                  value={newMaterial.material_name}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, material_name: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                  required
+                />
+              </td>
+              <td style={{ width: '10%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="النوع"
+                  value={newMaterial.material_type}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, material_type: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '8%', padding: '4px' }}>
+                <input
+                  type="number"
+                  value={newMaterial.quantity}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, quantity: parseInt(e.target.value) || 0 })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '12%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="مكان التخزين"
+                  value={newMaterial.storage_location}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, storage_location: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '12%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="المورد"
+                  value={newMaterial.supplier_name}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, supplier_name: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '10%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="رقم المورد"
+                  value={newMaterial.supplier_contact}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, supplier_contact: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '12%', padding: '4px' }}>
+                <input
+                  type="text"
+                  placeholder="مكان التوريد"
+                  value={newMaterial.supply_location}
+                  onChange={(e) => setNewMaterial({ ...newMaterial, supply_location: e.target.value })}
+                  style={{
+                    width: '100%',
+                    padding: '10px 8px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#2d3e50';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(45,62,80,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </td>
+              <td style={{ width: '12%', padding: '4px', textAlign: 'center' }}>
+                <button
+                  onClick={handleAddMaterial}
+                  style={{
+                    width: '100%',
+                    padding: '10px 0',
+                    background: '#2d3e50',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    boxShadow: '0 2px 4px rgba(45,62,80,0.2)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.background = '#1a2634';
+                    e.target.style.transform = 'translateY(-1px)';
+                    e.target.style.boxShadow = '0 4px 8px rgba(45,62,80,0.3)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.background = '#2d3e50';
+                    e.target.style.transform = 'translateY(0)';
+                    e.target.style.boxShadow = '0 2px 4px rgba(45,62,80,0.2)';
+                  }}
+                >
+                  إضافة
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      ) : (
+        /* للجوال - إضافة المواد بشكل عمودي */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          <input
+            type="text"
+            placeholder="اسم الخامة *"
+            value={newMaterial.material_name}
+            onChange={(e) => setNewMaterial({ ...newMaterial, material_name: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="text"
+            placeholder="النوع"
+            value={newMaterial.material_type}
+            onChange={(e) => setNewMaterial({ ...newMaterial, material_type: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="number"
+            placeholder="الكمية"
+            value={newMaterial.quantity}
+            onChange={(e) => setNewMaterial({ ...newMaterial, quantity: parseInt(e.target.value) || 0 })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="text"
+            placeholder="مكان التخزين"
+            value={newMaterial.storage_location}
+            onChange={(e) => setNewMaterial({ ...newMaterial, storage_location: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="text"
+            placeholder="المورد"
+            value={newMaterial.supplier_name}
+            onChange={(e) => setNewMaterial({ ...newMaterial, supplier_name: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="text"
+            placeholder="رقم المورد"
+            value={newMaterial.supplier_contact}
+            onChange={(e) => setNewMaterial({ ...newMaterial, supplier_contact: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <input
+            type="text"
+            placeholder="مكان التوريد"
+            value={newMaterial.supply_location}
+            onChange={(e) => setNewMaterial({ ...newMaterial, supply_location: e.target.value })}
+            style={{ width: '100%', padding: '12px', border: '1px solid #e2e8f0', borderRadius: '8px', fontSize: '14px', textAlign: 'right' }}
+          />
+          <button
+            onClick={handleAddMaterial}
+            style={{ width: '100%', padding: '14px', background: '#2d3e50', color: 'white', border: 'none', borderRadius: '8px', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}
+          >
+             إضافة 
+          </button>
+        </div>
+      )}
+    </div>
+  )}
+</div>
+  )}
+
+      {/* 4️⃣ صور الموقع */}
+      {(dailyReportId || reportId) && (
+        <div style={{ marginBottom: '48px', direction: 'rtl' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: '20px',
+            flexDirection: 'row-reverse'
+          }}>
+            <h3 style={{
+              fontSize: isMobile ? '18px' : '20px',
+              fontWeight: '600',
+              margin: 0,
+              textAlign: 'right',
+              flex: 1,
+              borderBottom: '2px solid #2d3e50',
+              paddingBottom: '12px',
+              color: '#1a2634'
+            }}>
+              صور الموقع
+            </h3>
+          </div>
+
+          {!viewOnly && canEdit && (
+            <div style={{ marginBottom: '24px' }}>
+              <div
+                style={{
+                  border: '2px dashed #cbd5e1',
+                  borderRadius: '16px',
+                  padding: isMobile ? '20px' : '30px',
+                  textAlign: 'center',
+                  background: '#f8fafc',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.borderColor = '#2d3e50'}
+                onMouseLeave={(e) => e.currentTarget.style.borderColor = '#cbd5e1'}
+                onClick={() => document.getElementById('imageUpload').click()}
+              >
+                <input
+                  id="imageUpload"
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  style={{ display: 'none' }}
+                />
+                <div style={{ fontSize: isMobile ? '28px' : '32px', marginBottom: '8px' }}>📸</div>
+                <p style={{ color: '#475569', fontSize: isMobile ? '13px' : '14px', fontWeight: '500', marginBottom: '4px' }}>
+                  {uploading ? 'جاري الرفع...' : 'اضغط لرفع صورة'}
+                </p>
+                <p style={{ color: '#94a3b8', fontSize: isMobile ? '11px' : '12px' }}>
+                  PNG, JPG, GIF
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fill, minmax(180px, 1fr))',
+            gap: isMobile ? '10px' : '20px'
+          }}>
+            {siteImages.map(image => (
+              <div
+                key={image.id}
+                style={{
+                  background: '#ffffff',
+                  borderRadius: '12px',
+                  overflow: 'hidden',
+                  border: '1px solid #edf2f7',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}
+                onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'}
+              >
+                <img
+                  src={`http://localhost:3000/${image.image_path}`}
+                  alt="Site"
+                  style={{
+                    width: '100%',
+                    height: isMobile ? '100px' : '140px',
+                    objectFit: 'cover',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease'
+                  }}
+                  onClick={() => window.open(`http://localhost:3000/${image.image_path}`, '_blank')}
+                  onMouseEnter={(e) => e.target.style.transform = 'scale(1.02)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+                />
+                <div style={{
+                  padding: isMobile ? '8px' : '12px',
+                  display: 'flex',
+                  flexDirection: 'row', // تم التعديل: ترتيب العناصر أفقياً
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  borderTop: '1px solid #f1f5f9'
+                }}>
+                  {/* تم تبديل أماكن العناصر: التاريخ في اليمين والزر في اليسار */}
+                  <span style={{ fontSize: isMobile ? '10px' : '11px', color: '#64748b' }}>
+                    {new Date(image.uploaded_at).toLocaleDateString('en-US')}
+                  </span>
+
+                  {!viewOnly && canEdit ? (
+                    <button
+                      onClick={() => handleDeleteImage(image.id)}
+                      disabled={!canEdit}
+                      style={{
+                        padding: isMobile ? '4px 10px' : '6px 16px',
+                        background: !canEdit ? '#e2e8f0' : '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '6px',
+                        fontSize: isMobile ? '10px' : '12px',
+                        fontWeight: '500',
+                        cursor: !canEdit ? 'not-allowed' : 'pointer',
+                        opacity: !canEdit ? 0.5 : 1,
+                        transition: 'all 0.2s ease',
+                        boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#dc2626';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#ef4444';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
+                        }
+                      }}
+                    >
+                      حذف
+                    </button>
+                  ) : (
+                    <span style={{ color: '#94a3b8', fontSize: '12px' }}>—</span>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            {siteImages.length === 0 && (
+              <div style={{
+                gridColumn: '1/-1',
+                textAlign: 'center',
+                padding: isMobile ? '30px' : '40px',
+                color: '#94a3b8',
+                background: '#f8fafc',
+                borderRadius: '12px',
+                border: '1px dashed #cbd5e1'
+              }}>
+                لا توجد صور
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+{/* 5️⃣ التوقيع */}
+{(dailyReportId || reportId) && (
+<div style={{ marginBottom: '48px' }}>
+  {/* هيدر التوقيع */}
+  <div
+    style={{
+      display: 'flex',
+      alignItems: 'center',
+      marginBottom: '20px',
+      flexDirection: 'row-reverse'
+    }}
+  >
+    <h3
+      style={{
+        fontSize: '20px',
+        fontWeight: '600',
+        margin: 0,
+        textAlign: 'right',
+        flex: 1,
+        borderBottom: '2px solid #2d3e50',
+        paddingBottom: '12px',
+        color: '#1a2634'
+      }}
+    >
+      التوقيع
+    </h3>
+  </div>
+
+  {/* للديسكتوب */}
+  {!isMobile && (
+    <div style={{ marginBottom: '20px' }}>
+      {Array.isArray(signatures) &&
+        signatures.map((signature) => (
+          <div
+            key={signature.id}
+            style={{
+              padding: '20px',
+              background: '#ffffff',
+              borderRadius: '12px',
+              border: '1px solid #edf2f7',
+              marginBottom: '10px',
+              display: 'flex',
+              alignItems: 'center',
+              textAlign: 'right',
+              justifyContent: 'space-between',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)'}
+            onMouseLeave={(e) => e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.02)'}
+          >
+            {editingSignature === signature.id && !viewOnly && canEdit ? (
+              <>
+                {/* أزرار الحفظ والإلغاء في اليسار - وضع التعديل */}
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => handleUpdateSignature(signature.id)}
+                    style={{
+                      padding: '6px 16px',
+                      background: '#10b981',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px', // تم التعديل: 8px (مربع)
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 4px rgba(16,185,129,0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#059669';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(16,185,129,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#10b981';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(16,185,129,0.2)';
+                    }}
+                  >
+                    حفظ
+                  </button>
+                  <button
+                    onClick={() => setEditingSignature(null)}
+                    style={{
+                      padding: '6px 16px',
+                      background: '#6b7280',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px', // تم التعديل: 8px (مربع)
+                      fontSize: '13px',
+                      fontWeight: '500',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 4px rgba(107,114,128,0.2)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = '#4b5563';
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 8px rgba(107,114,128,0.3)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = '#6b7280';
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(107,114,128,0.2)';
+                    }}
+                  >
+                    إلغاء
+                  </button>
+                </div>
+
+                {/* حقل تعديل التوقيع */}
+                <input
+                  type="text"
+                  value={editSignatureData}
+                  onChange={(e) => setEditSignatureData(e.target.value)}
+                  style={{
+                    flex: 1,
+                    marginRight: '16px',
+                    padding: '10px 14px',
+                    border: '1px solid #e2e8f0',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    backgroundColor: '#ffffff',
+                    textAlign: 'center',
+                    transition: 'all 0.2s ease',
+                    outline: 'none'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#f97316';
+                    e.target.style.boxShadow = '0 0 0 3px rgba(249,115,22,0.1)';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#e2e8f0';
+                    e.target.style.boxShadow = 'none';
+                  }}
+                />
+              </>
+            ) : (
+              <>
+                {/* أزرار تعديل وحذف في اليسار - وضع العرض */}
+                {!viewOnly && canEdit ? (
+                  <div style={{ display: 'flex', gap: '8px' }}>
+                    {/* زر التعديل */}
+                    <button
+                      onClick={() => handleEditSignature(signature)}
+                      disabled={!canEdit}
+                      style={{
+                        padding: '6px 16px',
+                        background: !canEdit ? '#e2e8f0' : '#f97316',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px', // تم التعديل: 8px (مربع)
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: !canEdit ? 'not-allowed' : 'pointer',
+                        opacity: !canEdit ? 0.5 : 1,
+                        transition: 'all 0.2s ease',
+                        boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(249,115,22,0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#ea580c';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(249,115,22,0.3)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#f97316';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(249,115,22,0.2)';
+                        }
+                      }}
+                    >
+                      تعديل
+                    </button>
+
+                    {/* زر الحذف */}
+                    <button
+                      onClick={() => handleDeleteSignature(signature.id)}
+                      disabled={!canEdit}
+                      style={{
+                        padding: '6px 16px',
+                        background: !canEdit ? '#e2e8f0' : '#ef4444',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px', // تم التعديل: 8px (مربع)
+                        fontSize: '13px',
+                        fontWeight: '500',
+                        cursor: !canEdit ? 'not-allowed' : 'pointer',
+                        opacity: !canEdit ? 0.5 : 1,
+                        transition: 'all 0.2s ease',
+                        boxShadow: !canEdit ? 'none' : '0 2px 4px rgba(239,68,68,0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#dc2626';
+                          e.currentTarget.style.transform = 'translateY(-1px)';
+                          e.currentTarget.style.boxShadow = '0 4px 8px rgba(239,68,68,0.3)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (canEdit) {
+                          e.currentTarget.style.background = '#ef4444';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(239,68,68,0.2)';
+                        }
+                      }}
+                    >
+                      حذف
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ width: '110px' }}></div>
+                )}
+
+                {/* محتوى التوقيع في الوسط */}
+                <div
+                  style={{
+                    flex: 1,
+                    textAlign: 'center',
+                    margin: '0 20px'
+                  }}
+                >
+                  <div style={{ fontWeight: '600', marginBottom: '6px', color: '#1a2634', fontSize: '15px' }}>
+                    {signature.signed_by}
+                  </div>
+                  <div style={{ fontSize: '14px', color: '#4b5563', marginBottom: '4px' }}>
+                    {signature.signature_data}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#9ca3af' }}>
+                    {signature.signed_at &&
+                      new Date(signature.signed_at).toLocaleDateString('en-US')}
+                  </div>
+                </div>
+
+                {/* عنصر فارغ للموازنة */}
+                <div style={{ width: '110px' }}></div>
+              </>
+            )}
+          </div>
+        ))}
+
+      {Array.isArray(signatures) && signatures.length === 0 && (
+        <div
+          style={{
+            padding: '40px',
+            textAlign: 'center',
+            color: '#94a3b8',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px dashed #cbd5e1'
+          }}
+        >
+          لا يوجد توقيع
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* للجوال - كروت (تم تعديلها فقط لتحريك الأزرار للأسفل) */}
+  {isMobile && (
+    <div style={{ marginBottom: '20px' }}>
+      {signatures.map((signature) => (
+        <div
+          key={signature.id}
+          style={{
+            padding: '16px',
+            background: '#ffffff',
+            borderRadius: '12px',
+            border: '1px solid #edf2f7',
+            marginBottom: '12px',
+            textAlign: 'right',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.02)'
+          }}
+        >
+          {editingSignature === signature.id && !viewOnly && canEdit ? (
+            <div>
+              <input
+                type="text"
+                value={editSignatureData}
+                onChange={(e) => setEditSignatureData(e.target.value)}
+                placeholder="عدل التوقيع"
+                style={{
+                  width: '100%',
+                  padding: '10px',
+                  marginBottom: '12px',
+                  border: '1px solid #e2e8f0',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  textAlign: 'right'
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  onClick={() => handleUpdateSignature(signature.id)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    background: '#10b981',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px'
+                  }}
+                >
+                  حفظ
+                </button>
+                <button
+                  onClick={() => setEditingSignature(null)}
+                  style={{
+                    flex: 1,
+                    padding: '10px',
+                    background: '#6b7280',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '13px'
+                  }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div>
+              <div style={{ fontWeight: '600', color: '#1a2634', fontSize: '16px',textAlign: 'center', marginBottom: '8px' }}>{signature.signed_by}</div>
+                          <div style={{ color: '#475569', fontSize: '15px', marginBottom: '12px',textAlign: 'center',  fontStyle: 'italic' }}>"{signature.signature_data}"</div>
+                          <div style={{ fontSize: '12px', color: '#94a3b8',textAlign: 'center',  borderTop: '1px dashed #d1d5db', paddingTop: '10px' }}>
+                            تاريخ التوقيع: {new Date(signature.signed_at).toLocaleDateString('en-US')} - {new Date(signature.signed_at).toLocaleTimeString('en-US')}
+                          </div>
+              
+              {/* أزرار تعديل وحذف - تم إنزالها للأسفل مع مسافة */}
+              {!viewOnly && canEdit && (
+                <div style={{ 
+                  display: 'flex', 
+                  gap: '8px',
+                  marginTop: '12px',
+                  borderTop: '1px dashed #e2e8f0',
+                  paddingTop: '16px'
+                }}>
+                  <button
+                    onClick={() => {
+                      setEditingSignature(signature.id);
+                      setEditSignatureData(signature.signature_data);
+                    }}
+                    disabled={!canEdit}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#f97316',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    تعديل
+                  </button>
+                  <button
+                    onClick={() => handleDeleteSignature(signature.id)}
+                    disabled={!canEdit}
+                    style={{
+                      flex: 1,
+                      padding: '12px',
+                      background: '#ef4444',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    حذف
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      ))}
+      {signatures.length === 0 && (
+        <div style={{
+          padding: '30px',
+          textAlign: 'center',
+          color: '#94a3b8',
+          background: '#f8fafc',
+          borderRadius: '12px',
+          border: '1px dashed #cbd5e1'
+        }}>
+          لا توجد توقيعات
+        </div>
+      )}
+    </div>
+  )}
+
+  {/* قسم إضافة توقيع جديد - تم تعديله للجوال فقط (حقل كبير والزر تحته) */}
+  {!viewOnly && canEdit && (
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: isMobile ? 'column' : 'row',
+        gap: '12px',
+        alignItems: isMobile ? 'stretch' : 'center',
+        marginTop: '24px',
+        padding: '16px',
+        background: '#f8fafc',
+        borderRadius: '12px',
+        width: '100%'
+      }}
+      dir="rtl"
+    >
+      {/* حقل الإدخال - مكبر للجوال */}
+      <textarea
         value={signatureData}
         onChange={(e) => setSignatureData(e.target.value)}
         placeholder="أدخل نص التوقيع"
+        rows={isMobile ? 3 : 1}
         style={{
-          flex: 1,
-          padding: '12px 16px',
+          width: '100%',
+          padding: '14px 16px',
           border: '1px solid #e2e8f0',
-          borderRadius: '8px',
-          fontSize: '14px',
+          borderRadius: '12px',
+          fontSize: isMobile ? '16px' : '14px',
           backgroundColor: '#ffffff',
-          textAlign: 'center',
-          textIndent: '-110px',
+          textAlign: 'right',
           transition: 'all 0.2s ease',
           outline: 'none',
+          resize: 'vertical',
+          minHeight: isMobile ? '100px' : 'auto',
+          fontFamily: "'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
+          lineHeight: '1.6',
           boxShadow: '0 2px 4px rgba(0,0,0,0.02)'
         }}
         onFocus={(e) => {
@@ -3041,43 +3565,77 @@ useEffect(() => {
         }}
         onBlur={(e) => {
           e.target.style.borderColor = '#e2e8f0';
-          e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+          e.target.style.boxShadow = 'none';
         }}
       />
+
+      {/* زر الإضافة - تحت للجوال */}
+      <button
+        onClick={handleAddSignature}
+        style={{
+          padding: isMobile ? '14px 20px' : '12px 28px',
+          background: '#2d3e50',
+          color: 'white',
+          border: 'none',
+          borderRadius: isMobile ? '12px' : '8px', // تم التعديل: 8px (مربع) للديسكتوب
+          fontSize: isMobile ? '16px' : '14px',
+          fontWeight: '600',
+          cursor: 'pointer',
+          width: isMobile ? '100%' : 'auto',
+          minWidth: isMobile ? '100%' : '110px',
+          transition: 'all 0.2s ease',
+          boxShadow: '0 4px 10px rgba(45,62,80,0.2)',
+          marginTop: isMobile ? '4px' : '0'
+        }}
+        onMouseEnter={(e) => {
+          e.target.style.background = '#1a2634';
+          e.target.style.transform = isMobile ? 'none' : 'translateY(-2px)';
+          e.target.style.boxShadow = '0 6px 15px rgba(45,62,80,0.3)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = '#2d3e50';
+          e.target.style.transform = 'none';
+          e.target.style.boxShadow = '0 4px 10px rgba(45,62,80,0.2)';
+        }}
+      >
+         إضافة 
+      </button>
     </div>
   )}
 </div>
- )}
+)}
+
         {/* 6️⃣ أزرار الإرسال والتحميل */}
         <div style={{ 
           display: 'flex', 
           justifyContent: 'center', 
-          gap: '20px', 
+          gap: isMobile ? '12px' : '20px', 
           marginTop: '32px',
           paddingTop: '32px',
-          borderTop: '2px solid #e2e8f0'
+          borderTop: '2px solid #e2e8f0',
+          flexDirection: isMobile ? 'column' : 'row'
         }}>
           <button
             onClick={handleSubmitReport}
             disabled={isSubmitting || !canEdit}
             style={{
-              padding: '14px 40px',
+              padding: isMobile ? '14px 20px' : '14px 40px',
               background: (isSubmitting || !canEdit) ? '#94a3b8' : '#059669',
               color: 'white',
               border: 'none',
-              borderRadius: '30px',
-              fontSize: '16px',
+              borderRadius: isMobile ? '12px' : '8px', // تم التعديل: 12px للجوال، 8px للديسكتوب (مربع)
+              fontSize: isMobile ? '14px' : '16px',
               fontWeight: '600',
               cursor: (isSubmitting || !canEdit) ? 'not-allowed' : 'pointer',
               transition: 'all 0.2s ease',
-              opacity: (isSubmitting || !canEdit) ? 0.5 : 1
+              opacity: (isSubmitting || !canEdit) ? 0.5 : 1,
+              width: isMobile ? '100%' : 'auto'
             }}
             onMouseEnter={(e) => !isSubmitting && canEdit && (e.target.style.background = '#047857')}
             onMouseLeave={(e) => !isSubmitting && canEdit && (e.target.style.background = '#059669')}
           >
             {isSubmitting ? 'جاري الإرسال...' : !canEdit ? 'التعديل مغلق' : 'إرسال التقرير'}
           </button>
-        
         </div>
       </div>
     </div>

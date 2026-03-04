@@ -7,7 +7,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import SubAdminDashboard from './pages/SubAdminDashboard';
-import ProjectReport from './pages/ProjectReport'; // ✅ إضافة صفحة التقرير
+import ProjectReport from './pages/ProjectReport'; 
 
 function App() {
   return (
@@ -16,7 +16,7 @@ function App() {
         <Route path="/" element={<Login />} />
         <Route path="/admin-dashboard" element={<AdminDashboard />} />
         <Route path="/subadmin-dashboard" element={<SubAdminDashboard />} />
-        <Route path="/project-report/:projectId" element={<ProjectReport />} /> {/* ✅ إضافة الراوت الجديد */}
+        <Route path="/project-report/:projectId" element={<ProjectReport />} />
       </Routes>
     </BrowserRouter>
   );
